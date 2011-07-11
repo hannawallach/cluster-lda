@@ -9,97 +9,97 @@ import cc.mallet.types.*;
 
 public class Corpus {
 
-	private Alphabet wordDict;
-	private TIntIntHashMap unseenCounts;
-	private ArrayList<Document> documents;
+  private Alphabet wordDict;
+  private TIntIntHashMap unseenCounts;
+  private ArrayList<Document> documents;
 
-	public Corpus(Alphabet wordDict, TIntIntHashMap unseenCounts) {
+  public Corpus(Alphabet wordDict, TIntIntHashMap unseenCounts) {
 
-		this.wordDict = wordDict;
+    this.wordDict = wordDict;
 
-		this.unseenCounts = unseenCounts;
+    this.unseenCounts = unseenCounts;
 
-		this.documents = new ArrayList<Document>();
-	}
+    this.documents = new ArrayList<Document>();
+  }
 
-	public void permute() {
+  public void permute() {
 
-		Collections.shuffle(documents);
-	}
+    Collections.shuffle(documents);
+  }
 
-	public void add(Document d) {
+  public void add(Document d) {
 
-		documents.add(d);
-	}
+    documents.add(d);
+  }
 
-	public int size() {
+  public int size() {
 
-		return documents.size();
-	}
+    return documents.size();
+  }
 
-	public Document getDocument(int d) {
+  public Document getDocument(int d) {
 
-		return documents.get(d);
-	}
+    return documents.get(d);
+  }
 
-	public ArrayList<Document> getDocuments() {
+  public ArrayList<Document> getDocuments() {
 
-		return documents;
-	}
+    return documents;
+  }
 
-	public Alphabet getWordDict() {
+  public Alphabet getWordDict() {
 
-		return wordDict;
-	}
+    return wordDict;
+  }
 
-	public void setWordDict(Alphabet wordDict) {
+  public void setWordDict(Alphabet wordDict) {
 
-		this.wordDict = wordDict;
-	}
+    this.wordDict = wordDict;
+  }
 
-	public TIntIntHashMap getUnseenCounts() {
+  public TIntIntHashMap getUnseenCounts() {
 
-		return this.unseenCounts;
-	}
+    return this.unseenCounts;
+  }
 
-	public int getUnseenCount(int index) {
+  public int getUnseenCount(int index) {
 
-		return this.unseenCounts.get(index);
-	}
+    return this.unseenCounts.get(index);
+  }
 
-	public void printAssignments(int[][] z, int N, int offset, String fileName) {
+  public void printAssignments(int[][] z, int N, int offset, String fileName) {
 
-		try {
+    try {
 
-			PrintWriter pw = new PrintWriter(fileName);
+      PrintWriter pw = new PrintWriter(fileName);
 
-			pw.println("#doc pos typeindex type topic");
+      pw.println("#doc pos typeindex type topic");
 
-			for (int d=0; d<documents.size(); d++) {
+      for (int d=0; d<documents.size(); d++) {
 
-				int[] fs = documents.get(d).getTokens();
+        int[] fs = documents.get(d).getTokens();
 
-				int nd = fs.length;
+        int nd = fs.length;
 
-				if (N != -1)
-					nd = Math.min(nd - offset, N);
+        if (N != -1)
+          nd = Math.min(nd - offset, N);
 
-				for (int i=0; i<nd; i++) {
+        for (int i=0; i<nd; i++) {
 
-					int w = fs[i + offset];
+          int w = fs[i + offset];
 
-					pw.print(d); pw.print(" ");
-					pw.print(i); pw.print(" ");
-					pw.print(w); pw.print(" ");
-					pw.print(wordDict.lookupObject(w)); pw.print(" ");
-					pw.print(z[d][i]); pw.println();
-				}
-			}
+          pw.print(d); pw.print(" ");
+          pw.print(i); pw.print(" ");
+          pw.print(w); pw.print(" ");
+          pw.print(wordDict.lookupObject(w)); pw.print(" ");
+          pw.print(z[d][i]); pw.println();
+        }
+      }
 
-			pw.close();
-		}
-		catch (IOException e) {
-			System.out.println(e);
-		}
-	}
+      pw.close();
+    }
+    catch (IOException e) {
+      System.out.println(e);
+    }
+  }
 }

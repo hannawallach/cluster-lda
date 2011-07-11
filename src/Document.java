@@ -4,66 +4,66 @@ import gnu.trove.*;
 
 public class Document {
 
-	private String source;
-	private TIntArrayList tokenList;
-	private int[] tokens;
-	private int cluster;
+  private String source;
+  private TIntArrayList tokenList;
+  private int[] tokens;
+  private int cluster;
 
-	public Document(String source) {
+  public Document(String source) {
 
-		this.source = source;
+    this.source = source;
 
-		this.tokenList = new TIntArrayList();
+    this.tokenList = new TIntArrayList();
 
-		this.cluster = -1;
-	}
+    this.cluster = -1;
+  }
 
-	public void add(int[] tokens) {
+  public void add(int[] tokens) {
 
-		tokenList.add(tokens);
-	}
+    tokenList.add(tokens);
+  }
 
-	public void lock() {
+  public void lock() {
 
-		tokens = tokenList.toNativeArray();
-		tokenList = null;
-	}
+    tokens = tokenList.toNativeArray();
+    tokenList = null;
+  }
 
-	public void unLock() {
+  public void unLock() {
 
-		tokenList = new TIntArrayList();
-		tokenList.add(tokens);
+    tokenList = new TIntArrayList();
+    tokenList.add(tokens);
 
-		tokens = null;
-	}
+    tokens = null;
+  }
 
-	public String getSource() {
+  public String getSource() {
 
-		return source;
-	}
+    return source;
+  }
 
-	public int getLength() {
+  public int getLength() {
 
-		return tokens.length;
-	}
+    return tokens.length;
+  }
 
-	public int getToken(int i) {
+  public int getToken(int i) {
 
-		return tokens[i];
-	}
+    return tokens[i];
+  }
 
-	public int[] getTokens() {
+  public int[] getTokens() {
 
-		return tokens;
-	}
+    return tokens;
+  }
 
-	public void setCluster(int cluster) {
+  public void setCluster(int cluster) {
 
-		this.cluster = cluster;
-	}
+    this.cluster = cluster;
+  }
 
-	public int getCluster() {
+  public int getCluster() {
 
-		return this.cluster;
-	}
+    return this.cluster;
+  }
 }

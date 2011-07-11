@@ -7,31 +7,31 @@ public class HyperparamLoader {
 
   public static void load(int N, String fileName, double[] hyperparam) {
 
-		int currentPosition = 0;
+    int currentPosition = 0;
 
-		assert hyperparam.length == N;
+    assert hyperparam.length == N;
 
-		try {
+    try {
 
-			BufferedReader in = new BufferedReader(new FileReader(fileName));
+      BufferedReader in = new BufferedReader(new FileReader(fileName));
 
-			String line = null;
+      String line = null;
 
-			while ((line = in.readLine()) != null) {
+      while ((line = in.readLine()) != null) {
 
-				double value = Double.parseDouble(line.trim());
+        double value = Double.parseDouble(line.trim());
 
-				hyperparam[currentPosition] = value;
+        hyperparam[currentPosition] = value;
 
-				currentPosition++;
-			}
+        currentPosition++;
+      }
 
-			in.close();
-		}
-		catch (IOException e) {
-			System.out.println(e);
-		}
+      in.close();
+    }
+    catch (IOException e) {
+      System.out.println(e);
+    }
 
-		assert currentPosition == N;
-	}
+    assert currentPosition == N;
+  }
 }
