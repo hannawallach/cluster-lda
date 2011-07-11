@@ -62,53 +62,6 @@ $(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOC
 	  cat $(@D)/topic_log_prob.txt.$$x >> $(@); \
 	done
 
-$(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID)/log_prob_clusters_permutations.txt:
-	java $(JAVA_FLAGS) \
-	-classpath $(CP) \
-        edu.umass.cs.wallach.cluster.ClusterPermuteEvaluator \
-	$(DATA_DIR)/patents/$*.dat \
-	$(@D)/cluster_assignments.txt \
-	$(@D)/alpha.txt \
-	$(@D)/theta.txt \
-	$(C) \
-	$(DOCCOUNTS) \
-	$(PRIOR) \
-	$(@D) \
-	> $(@D)/permute_stdout.txt
-
-$(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID)/log_prob_test.txt:
-	java $(JAVA_FLAGS) \
-	-classpath $(CP) \
-        edu.umass.cs.wallach.cluster.ClusterWordEvaluator \
-	$(DATA_DIR)/patents/$*.dat \
-	$(DATA_DIR)/patents/test.dat \
-	$(@D)/cluster_assignments.txt \
-	$(@D)/alpha.txt \
-	$(@D)/theta.txt \
-	$(C) \
-	$(DOCCOUNTS) \
-	$(PRIOR) \
-	$(@D) \
-	> $(@D)/evaluate_stdout.txt
-
-$(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID)/log_prob_test_permutations.txt:
-	java $(JAVA_FLAGS) \
-	-classpath $(CP) \
-        edu.umass.cs.wallach.cluster.ClusterPermuteTestEvaluator \
-	$(DATA_DIR)/patents/$*.dat \
-	$(DATA_DIR)/patents/test.dat \
-	$(@D)/cluster_assignments.txt \
-	$(@D)/alpha.txt \
-	$(@D)/theta.txt \
-	$(C) \
-	$(DOCCOUNTS) \
-	$(PRIOR) \
-	$(@D) \
-	> $(@D)/permute_evaluate_stdout.txt
-
-$(RESULTS_DIR)/cluster/%/results.txt:
-	./$(SCRIPTS_DIR)/aggregate_test_log_probs.sh > $@
-
 $(RESULTS_DIR)/cluster/%/num_clusters.txt:
 	./$(SCRIPTS_DIR)/aggregate_num_clusters.sh > $@
 
