@@ -1,6 +1,0 @@
-This work was supported in part by the Center for Intelligent
-Information Retrieval and in part by The Central Intelligence Agency,
-the National Security Agency and National Science Foundation under NSF
-grant #IIS-0326249. Any opinions, findings and conclusions or
-recommendations expressed in this material are the authors' and do not
-necessarily reflect those of the sponsor.
