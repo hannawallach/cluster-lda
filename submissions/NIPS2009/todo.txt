@@ -1,0 +1,35 @@
+Comments from reviewers:
+
+* Formal definition of the uniform process
+
+* Asymptotic and simulation results for DP & PYP are well-known, and
+  results for the UP are only interesting if it's a good alaternative
+
+* Confusing discussion of exchangeability: "exchangeable" is a
+  property of distributions, not cluster assignments. Talking about
+  cluster assignments corresponding to the same partition might be
+  clearer. Reducing to a canonical ordering for each partition seems
+  problematic, since the distribution no longer sums to one.
+
+* P(clusters) was incorrect in the old version of the paper
+
+* Different ordering of the data will give different results
+
+* No novelty compared to Shane's JASA paper (& the paper that
+  introduced the UP). arXiv reference [3] is the sole theoretical
+  result relating to this work (but is textbook).
+
+My comments:
+
+* Talk about the lack of exchangeability (maybe talk a bit about Max's
+  section 3.1 or use that way of describing it)
+
+* Then talk about how for a fixed permutation, you have P(c) as given
+  in your thesis, and talk about the corrected Gibbs sampler
+
+* Then talk about the fact that we can't really sum over all possible
+  permutations of the data, but that we can quantify the extent to
+  which permuting the data affects the log prob
+
+* Talk about the experiments on permutations -- so basically summarize
+  that previous email I sent you -- and give the new plot

@@ -1,0 +1,27 @@
+initialize l
+for each document d do
+  initialize p_d = 0
+  for each particle r = 1 to R do
+    for each d' < d do
+      resample c_{d'}^(r) ~ P(c_{d'}^(r) | w_{d'}, w_{<d}, {c_{<d}^(r)}_{\d'})
+    end for
+    % remember the below is for the WHOLE document
+    p_d = p_d + sum_c P(w_d | c, w_{<d}, c_{<d}^(r)) P(c | c_{<d}^(r))
+    sample c_d^(r) ~ P(c_d^(r) | w_d, w_{<d}, c_{<d}^(r))
+  end for
+  p_d = p_d / R
+  l = l + log p_d
+end for
+
+Now, how to handle training data? Well since we're not looking at
+per-document counts, as in topic modeling, we can either:
+
+* clamp \Phi and \Psi after the training data and not update counts --
+  this means that training data wouldn't be taken into account for
+  either \Phi or \Psi -- can we *do* this for \Psi where we are adding
+  things to new clusters? I'm not sure we can...
+
+* given a particular set of cluster assignments for the training data,
+  we can use the above algorithm as-is and just update counts etc. --
+  if we do this for lots of different sets of training assignments,
+  then how valid is this? how can we make that marginalization work?

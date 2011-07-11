@@ -1,0 +1,43 @@
+Zoubin suggests that one way to show that non-exchangeability is not
+an issue is to demonstrate that permuting the data has much less of an
+effect on the probability than varying other parameters.
+
+Proposed experiment:
+
+* Run the UP clustering code w/ various theta values (0.5, 1.0, 2.0,
+  5.0, 10.0). This will give a set of cluster assignments for each
+  theta value. For each set of cluster assignments, compute
+  P(clusters) under various different permutations of the data. Show
+  that theta has a greater effect on P(clusters) than permutation.
+
+* Ideally we want to show that the permutation doesn't affect the
+  cluster assignments either. Therefore we should really run the UP
+  clustering code w/ various theta values for diff. permutations. This
+  is a lot slower, obviously, but we should do it if we have
+  time. Then we can summarize that permuting the data doesn't really
+  affect the # of clusters inferred or cluster size etc. Although, do
+  we need to do this? We have theoretical results for things like
+  expected # of clusters and clusters sizes and apparently these do
+  not depend on the data ordering -- so is this expt. necessary?
+
+These experiments, combined with the expt. involving test data should
+serve to prove that permutation is not a big deal:
+
+* For each theta value, clamp cluster assignments after training data,
+  run evaluation code to compute P(test data) for various different
+  permutations. Plot error bars.
+
+One question: how to deal with multiple runs as well as permutations?
+
+-- 
+
+* Run UP to get 5 sets of of cluster assignments for each theta value
+
+* For each of these 5 * theta sets of cluster assignments, permute the
+  data 5000 times and compute log P(cluster assignments)
+
+* For each run, theta pair compute the mean (col 4) and st dev (col 5)
+
+* Grey: average (over runs) of col 5 for each theta value
+
+* Black: st dev of the means for each theta value
