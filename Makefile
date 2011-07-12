@@ -41,6 +41,7 @@ $(DATA_DIR)/patents/%.dat: $(DATA_DIR)/patents/%
 
 $(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
+	I=`expr $(SG) / 10`; \
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
         edu.umass.cs.wallach.cluster.ClusterWordExperiment \
@@ -48,6 +49,7 @@ $(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOC
 	$(C) \
 	$(SG) \
 	$(SC) \
+	$$I \
 	$(THETA) \
 	$(SAMPLE) \
 	$(DOCCOUNTS) \
@@ -55,12 +57,6 @@ $(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOC
 	$@ \
 	> $@/stdout.txt
 
-$(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID)/log_prob.txt:
-	MAX=`expr $(SG) - 1`; \
-	echo -n "" > $@; \
-	for x in `seq 0 $$MAX`; do \
-	  cat $(@D)/topic_log_prob.txt.$$x >> $(@); \
-	done
 
 $(RESULTS_DIR)/cluster/%/num_clusters.txt:
 	./$(SCRIPTS_DIR)/aggregate_num_clusters.sh > $@

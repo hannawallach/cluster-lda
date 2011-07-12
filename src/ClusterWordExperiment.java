@@ -1,14 +1,24 @@
 package edu.umass.cs.wallach.cluster;
 
-import gnu.trove.*;
-
-import java.util.*;
 import java.io.*;
+import java.util.*;
+
+import gnu.trove.*;
 
 import cc.mallet.types.*;
 import cc.mallet.pipe.*;
 
 public class ClusterWordExperiment {
+
+  public static void getClusteredCorpus(Corpus docs, int C) {
+
+    assert docs.size() >= C;
+
+    LogRandoms rng = new LogRandoms();
+
+    for (int d=0; d<docs.size(); d++)
+      docs.getDocument(d).setCluster(rng.nextInt(C));
+  }
 
   public static void getClusteredCorpus(Corpus docs, ClusterFeature.Cluster[] clusterAssignments) {
 
@@ -20,8 +30,8 @@ public class ClusterWordExperiment {
 
   public static void main(String[] args) {
 
-    if (args.length != 9) {
-      System.out.println("Usage: ClusterWordExperiment <data> <num_clusters> <num_itns> <num_cluster_itns> <theta_init> <sample_conc_param> <use_doc_counts> <prior_type> <output_dir>");
+    if (args.length != 10) {
+      System.out.println("Usage: ClusterWordExperiment <data> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <sample_conc_param> <use_doc_counts> <prior_type> <output_dir>");
       System.exit(1);
     }
 
@@ -32,29 +42,27 @@ public class ClusterWordExperiment {
     int numIterations = Integer.parseInt(args[2]);
     int numClusterIterations = Integer.parseInt(args[3]);
 
-    double theta = Double.parseDouble(args[4]);
+    int saveStateInterval = Integer.parseInt(args[4]);
 
-    boolean sampleConcentrationParameter = Boolean.valueOf(args[5]);
+    double theta = Double.parseDouble(args[5]);
 
-    boolean useDocCounts = Boolean.valueOf(args[6]);
+    boolean sampleConcentrationParameter = Boolean.valueOf(args[6]);
 
-    String priorType = args[7]; // type of prior
+    boolean useDocCounts = Boolean.valueOf(args[7]);
+
+    String priorType = args[8]; // type of prior
 
     assert priorType.equals("UP") || priorType.equals("DP");
 
-    String outputDir = args[8]; // output directory
+    String outputDir = args[9]; // output directory
 
-    String stateFileName = outputDir + "/state.txt";
+    String stateFileName = outputDir + "/state.txt.gz";
 
     Alphabet wordDict = new Alphabet();
 
     Corpus docs = new Corpus(wordDict, null);
 
-    InstanceListLoader.load(fileName, 0, -1, docs);
-
-    System.out.println("Data loaded.");
-
-    System.out.println(docs.size());
+    InstanceListLoader.load(fileName, docs);
 
     int W = wordDict.size();
 
@@ -71,14 +79,16 @@ public class ClusterWordExperiment {
       System.out.println(e);
     }
 
-    // sample clusters and topics...
-
     int[][] z = new int[docs.size()][];
 
     for (int d=0; d<docs.size(); d++)
       z[d] = docs.getDocument(d).getTokens().clone();
 
-    docs.printAssignments(z, -1, 0, stateFileName);
+    docs.printFeatures(z, stateFileName);
+
+    getClusteredCorpus(docs, C);
+
+    // sample...
 
     ClusterFeature ct = new ClusterFeature();
 
@@ -86,21 +96,27 @@ public class ClusterWordExperiment {
 
     double[] alpha = new double[] { 20000.0, 1000.0, 10.0 };
 
-    for (int s=0; s<numIterations; s++) {
+    for (int s=1; s<=numIterations; s++) {
 
-      String iteration = Integer.toString(s);
+      String itn = Integer.toString(s);
 
       // cluster documents and output final clustering
 
-      ct.initialize(theta, priorType, C, max, alpha, W, stateFileName, null, useDocCounts, docs);
+      ct.initialize(theta, priorType, max, alpha, W, stateFileName, null, useDocCounts, docs);
 
-      for (int i=0; i<1; i++) {
+      if (s % saveStateInterval == 0) {
 
-        ct.estimate(sampleConcentrationParameter, numClusterIterations, outputDir + "/cluster_assignments.txt", outputDir + "/num_clusters.txt", outputDir + "/theta.txt", outputDir + "/topic_log_prob.txt." + iteration);
+        ct.estimate(sampleConcentrationParameter, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/theta.txt", outputDir + "/log_prob.txt");
 
-        alpha = ct.sampleAlpha(5, outputDir + "/alpha.txt");
+        alpha = ct.sampleAlpha(5, outputDir + "/alpha.txt." + itn);
 
-        ct.printClusterFeatures(outputDir + "/cluster_features.txt");
+        ct.printClusterFeatures(outputDir + "/cluster_features.txt.gz." + itn);
+      }
+      else {
+
+        ct.estimate(sampleConcentrationParameter, numClusterIterations);
+
+        alpha = ct.sampleAlpha(5);
       }
 
       // extract new concentration parameter value

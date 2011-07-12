@@ -2,6 +2,8 @@ package edu.umass.cs.wallach.cluster;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.*;
+
 import gnu.trove.*;
 
 public class ItemLoader {
@@ -17,7 +19,7 @@ public class ItemLoader {
 
     try {
 
-      BufferedReader in = new BufferedReader(new FileReader(fileName));
+      BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(new File(fileName)))));
 
       String line = null;
 
@@ -27,13 +29,13 @@ public class ItemLoader {
 
         String[] fields = line.split("\\s+");
 
-        // each line consists of doc X X X featureindex
+        // each line consists of doc source X X X feature
 
-        if (fields.length != 5)
+        if (fields.length != 6)
           continue;
 
         int docIndex = Integer.parseInt(fields[0]);
-        int feature = Integer.parseInt(fields[4]);
+        int feature = Integer.parseInt(fields[5]);
 
         if (feature > maxFeature)
           maxFeature = feature;

@@ -2,6 +2,7 @@ package edu.umass.cs.wallach.cluster;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.*;
 
 import gnu.trove.*;
 
@@ -112,8 +113,6 @@ public class ClusterFeatureScoreSparse {
     return score;
   }
 
-  // unseen handling!
-
   public double getClusterScoreNoPrior(int f, int c) {
 
     int nc = featureClusterCountsNorm[c];
@@ -124,66 +123,19 @@ public class ClusterFeatureScoreSparse {
 
       long index = ((long) f * C) + c;
 
-      return (double) featureClusterCounts.get(index) / (double) nc;
+      double score = (double) featureClusterCounts.get(index) / (double) nc;
+
+      if (unseenCounts != null)
+        if (unseenCounts.containsKey(f))
+          score /= (double) unseenCounts.get(f);
+
+      return score;
     }
   }
 
   public void incrementCounts(int f, int d, int c) {
 
-    if (useDocs) {
-
-      long index = ((long) f * D) + d;
-
-      int oldCount = featureItemCounts.get(index);
-      featureItemCounts.put(index, oldCount + 1);
-      featureItemCountsNorm[d]++;
-
-      if (score.equals("minimal")) {
-        if (oldCount == 0) {
-
-          index = ((long) f * C) + c;
-
-          oldCount = featureClusterCounts.get(index);
-          featureClusterCounts.put(index, oldCount + 1);
-          featureClusterCountsNorm[c]++;
-
-          if (oldCount == 0) {
-            featureCounts[f]++;
-            featureCountsNorm++;
-          }
-        }
-      }
-      else {
-
-        index = ((long) f * C) + c;
-
-        oldCount = featureClusterCounts.get(index);
-        featureClusterCounts.put(index, oldCount + 1);
-        featureClusterCountsNorm[c]++;
-
-        featureCounts[f]++;
-        featureCountsNorm++;
-      }
-    }
-    else {
-
-      long index = ((long) f * C) + c;
-
-      int oldCount = featureClusterCounts.get(index);
-      featureClusterCounts.put(index, oldCount + 1);
-      featureClusterCountsNorm[c]++;
-
-      if (score.equals("minimal")) {
-        if (oldCount == 0) {
-          featureCounts[f]++;
-          featureCountsNorm++;
-        }
-      }
-      else {
-        featureCounts[f]++;
-        featureCountsNorm++;
-      }
-    }
+    incrementCounts(f, d, c, 1);
   }
 
   public void incrementCounts(int f, int d, int c, int nfd) {
@@ -246,60 +198,7 @@ public class ClusterFeatureScoreSparse {
 
   public void decrementCounts(int f, int d, int c) {
 
-    if (useDocs) {
-
-      long index = ((long) f * D) + d;
-
-      int oldCount = featureItemCounts.get(index);
-      featureItemCounts.put(index, oldCount - 1);
-      featureItemCountsNorm[d]--;
-
-      if (score.equals("minimal")) {
-        if (oldCount == 1) {
-
-          index = ((long) f * C) + c;
-
-          oldCount = featureClusterCounts.get(index);
-          featureClusterCounts.put(index, oldCount - 1);
-          featureClusterCountsNorm[c]--;
-
-          if (oldCount == 1) {
-            featureCounts[f]--;
-            featureCountsNorm--;
-          }
-        }
-      }
-      else {
-
-        index = ((long) f * C) + c;
-
-        oldCount = featureClusterCounts.get(index);
-        featureClusterCounts.put(index, oldCount - 1);
-        featureClusterCountsNorm[c]--;
-
-        featureCounts[f]--;
-        featureCountsNorm--;
-      }
-    }
-    else {
-
-      long index = ((long) f * C) + c;
-
-      int oldCount = featureClusterCounts.get(index);
-      featureClusterCounts.put(index, oldCount - 1);
-      featureClusterCountsNorm[c]--;
-
-      if (score.equals("minimal")) {
-        if (oldCount == 1) {
-          featureCounts[f]--;
-          featureCountsNorm--;
-        }
-      }
-      else {
-        featureCounts[f]--;
-        featureCountsNorm--;
-      }
-    }
+    decrementCounts(f, d, c, 1);
   }
 
   public void decrementCounts(int f, int d, int c, int nfd) {
@@ -537,9 +436,9 @@ public class ClusterFeatureScoreSparse {
 
     try {
 
-      PrintWriter pw = new PrintWriter(fileName);
+      PrintStream pw = new PrintStream(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(new File(fileName)))));
 
-      pw.println("cluster feature proportion ...");
+      pw.println("#cluster feature proportion ...");
 
       double[] dist = new double[F];
 
@@ -566,7 +465,7 @@ public class ClusterFeatureScoreSparse {
             }
           }
 
-          // break if there are no more topics whose proportion is
+          // break if there are no more features whose proportion is
           // greater than zero or threshold...
 
           if ((index == -1) || (dist[index] < threshold))

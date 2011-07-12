@@ -2,6 +2,7 @@ package edu.umass.cs.wallach.cluster;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.*;
 
 import gnu.trove.*;
 
@@ -67,13 +68,13 @@ public class Corpus {
     return this.unseenCounts.get(index);
   }
 
-  public void printAssignments(int[][] z, int N, int offset, String fileName) {
+  public void printFeatures(int[][] z, String fileName) {
 
     try {
 
-      PrintWriter pw = new PrintWriter(fileName);
+      PrintStream pw = new PrintStream(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(new File(fileName)))));
 
-      pw.println("#doc pos typeindex type topic");
+      pw.println("#doc source pos typeindex type feature");
 
       for (int d=0; d<documents.size(); d++) {
 
@@ -81,14 +82,12 @@ public class Corpus {
 
         int nd = fs.length;
 
-        if (N != -1)
-          nd = Math.min(nd - offset, N);
-
         for (int i=0; i<nd; i++) {
 
-          int w = fs[i + offset];
+          int w = fs[i];
 
           pw.print(d); pw.print(" ");
+          pw.print(documents.get(d).getSource()); pw.print(" ");
           pw.print(i); pw.print(" ");
           pw.print(w); pw.print(" ");
           pw.print(wordDict.lookupObject(w)); pw.print(" ");

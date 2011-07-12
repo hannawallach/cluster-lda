@@ -2,13 +2,11 @@ package edu.umass.cs.wallach.cluster;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.*;
 
 import gnu.trove.*;
 
 import cc.mallet.util.Maths;
-
-// ClusterFeature clusters documents from one type of information
-// (e.g., authors or topics)
 
 public class ClusterFeature {
 
@@ -57,7 +55,7 @@ public class ClusterFeature {
   // clusters, initClusters is the number of clusters to use,
   // itemFile indicates which features have been used in each document
 
-  public void initialize(double theta, String priorType, int initClusters, int maxClusters, double[] alpha, int F, String itemFile, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
+  public void initialize(double theta, String priorType, int maxClusters, double[] alpha, int F, String itemFile, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
 
     this.theta = theta;
 
@@ -74,8 +72,6 @@ public class ClusterFeature {
     TIntIntHashMap[] z = new TIntIntHashMap[docs.size()];
 
     int maxFeature = ItemLoader.load(itemFile, z);
-
-    assert maxFeature <= F;
 
     // have to initialize set of items...
 
@@ -114,12 +110,11 @@ public class ClusterFeature {
 
       Item item = items[d];
 
-      // get the old cluster ID for this document (if one exists)
+      // get the old cluster ID for this document
 
       int c = docs.getDocument(d).getCluster();
 
-      if (c == -1)
-        c = rng.nextInt(initClusters);
+      assert c != -1;
 
       Cluster cluster = clusters[c];
 
@@ -150,68 +145,49 @@ public class ClusterFeature {
       if (cluster.isEmpty())
         emptyClusterStack.push(cluster);
 
-    //System.out.println("Initialized cluster assignments.");
-
     initialized = true;
   }
 
-  public void estimate(boolean sampleTheta, int S, String clustersFileName, String numClustersFileName, String thetaFileName, String dataLogProbFileName) {
+  public void estimate(boolean sampleTheta, int S, String clustersFileName, String numClustersFileName, String thetaFileName, String logProbFileName) {
 
-    assert initialized == true;
+    estimate(sampleTheta, S);
 
-    System.out.println((C - emptyClusterStack.size()) + " clusters");
+    printClusterAssignments(clustersFileName);
+    printNumClusters(numClustersFileName);
+    printTheta(thetaFileName);
 
-    for (int s=1; s<=S; s++) {
-
-      sampleClusters(true);
-
-      System.out.print((C - emptyClusterStack.size()) + " ");
-
-      // sample concentration parameter based on previous clustering
-
-      if (sampleTheta)
-        sampleTheta(5, 1.0);
-
-      printClusterAssignments(clustersFileName);
-      printNumClusters(numClustersFileName);
-      printTheta(thetaFileName);
-
-      printLogProbData(dataLogProbFileName);
-    }
-
-    System.out.println();
+    printLogProb(logProbFileName);
   }
 
   public void estimate(boolean sampleTheta, int S) {
 
     assert initialized == true;
 
-    System.out.println((C - emptyClusterStack.size()) + " clusters");
-
     for (int s=1; s<=S; s++) {
 
       sampleClusters(true);
-
-      System.out.print((C - emptyClusterStack.size()) + " ");
 
       // sample concentration parameter based on previous clustering
 
       if (sampleTheta)
         sampleTheta(5, 1.0);
     }
-
-    System.out.println();
   }
 
   public double[] sampleAlpha(int numItns, String alphaFileName) {
 
-    featureScore.sampleAlpha(clusterAssignments, items, rng, numItns, 1.0);
-
-    double[] alpha = featureScore.getAlpha();
+    double[] alpha = sampleAlpha(numItns);
 
     printAlpha(alpha, alphaFileName);
 
     return alpha;
+  }
+
+  public double[] sampleAlpha(int numItns) {
+
+    featureScore.sampleAlpha(clusterAssignments, items, rng, numItns, 1.0);
+
+    return featureScore.getAlpha();
   }
 
   // sample cluster assignments
@@ -401,13 +377,15 @@ public class ClusterFeature {
 
     try {
 
-      PrintWriter pw = new PrintWriter(fileName);
+      PrintStream pw = new PrintStream(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(new File(fileName)))));
+
+      pw.println("#doc source cluster");
 
       for (int d=0; d<D; d++) {
 
-        String docName = docs.getDocument(d).getSource();
-
-        pw.println(docName + " " + clusterAssignments[d].ID);
+        pw.print(d); pw.print(" ");
+        pw.print(docs.getDocument(d).getSource()); pw.print(" ");
+        pw.print(clusterAssignments[d].ID); pw.println();
       }
 
       pw.close();
@@ -421,7 +399,7 @@ public class ClusterFeature {
 
     try {
 
-      PrintWriter pw = new PrintWriter(fileName);
+      PrintWriter pw = new PrintWriter(new FileWriter(fileName, true));
 
       pw.println(theta);
 
@@ -432,13 +410,14 @@ public class ClusterFeature {
     }
   }
 
-  public void printLogProbData(String fileName) {
+  public void printLogProb(String fileName) {
 
     try {
 
-      PrintWriter pw = new PrintWriter(fileName);
+      PrintWriter pw = new PrintWriter(new FileWriter(fileName, true));
 
-      pw.println(getLogProbData());
+      pw.print(getLogLikelihood()); pw.print(" ");
+      pw.print(getLogPrior()); pw.println();
 
       pw.close();
     }
@@ -467,7 +446,7 @@ public class ClusterFeature {
 
     try {
 
-      PrintWriter pw = new PrintWriter(fileName);
+      PrintWriter pw = new PrintWriter(new FileWriter(fileName, true));
 
       pw.println((C - emptyClusterStack.size()));
 
@@ -483,17 +462,17 @@ public class ClusterFeature {
     featureScore.printClusterFeatures(0.0, -1, fileName);
   }
 
-  public double getLogProbData() {
+  public double getLogLikelihood() {
 
     return featureScore.logProb(clusterAssignments, items);
   }
 
-  public double getLogProbClusters() {
+  public double getLogPrior() {
 
-    return getLogProbClusters(theta);
+    return getLogPrior(theta);
   }
 
-  public double getLogProbClusters(double newTheta) {
+  public double getLogPrior(double newTheta) {
 
     double logProb = 0.0;
 
@@ -554,7 +533,7 @@ public class ClusterFeature {
 
     for (int s=0; s<numSamples; s++) {
 
-      double lp = getLogProbClusters(Math.exp(rawParam)) + rawParam;
+      double lp = getLogPrior(Math.exp(rawParam)) + rawParam;
       double lpNew = Math.log(rng.nextUniform()) + lp;
 
       l = rawParam - rng.nextUniform() * stepSize;
@@ -566,7 +545,7 @@ public class ClusterFeature {
 
         rawParamNew = l + rng.nextUniform() * (r - l);
 
-        if (getLogProbClusters(Math.exp(rawParamNew)) + rawParamNew > lpNew)
+        if (getLogPrior(Math.exp(rawParamNew)) + rawParamNew > lpNew)
           break;
         else
           if (rawParamNew < rawParam)
@@ -595,7 +574,7 @@ public class ClusterFeature {
 
     private HashSet<Item> clusterItems;
 
-    public Cluster (int ID) { // # features, cluster ID
+    public Cluster (int ID) { // cluster ID
 
       this.ID = ID;
 
@@ -664,7 +643,7 @@ public class ClusterFeature {
     }
   }
 
-  class Item implements Comparable {
+  class Item {
 
     public TIntIntHashMap counts;
 
@@ -675,14 +654,6 @@ public class ClusterFeature {
       this.counts = counts;
 
       this.ID = ID;
-    }
-
-    public int compareTo(Object item) throws ClassCastException {
-
-      if (!(item instanceof Item))
-        throw new ClassCastException("Expected an Item object.");
-
-      return this.ID - ((Item) item).ID;
     }
   }
 }

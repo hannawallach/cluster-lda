@@ -2,7 +2,6 @@ package edu.umass.cs.wallach.cluster;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.*;
 
 import gnu.trove.*;
 
@@ -10,7 +9,7 @@ import cc.mallet.types.*;
 
 public class InstanceListLoader {
 
-  public static void load(String inputFile, int offset, int N, Corpus docs) {
+  public static void load(String inputFile, Corpus docs) {
 
     InstanceList instances = InstanceList.load(new File(inputFile));
 
@@ -28,25 +27,25 @@ public class InstanceListLoader {
 
       int nd = fs.getLength();
 
-      if (N != -1)
-        nd = Math.min(nd - offset, N);
-
       if (nd > 0) {
 
         Document document = new Document(instance.getSource().toString());
 
-        int[] tokens = new int[nd];
+        TIntArrayList tokenList = new TIntArrayList();
 
         for (int i=0; i<nd; i++) {
 
-          String word = ((String) instanceDict.lookupObject(fs.getIndexAtPosition(i + offset))).toLowerCase();
+          String word = ((String) instanceDict.lookupObject(fs.getIndexAtPosition(i))).toLowerCase();
 
-          tokens[i] = wordDict.lookupIndex(word);
+          int w = wordDict.lookupIndex(word);
+
+          if (w != -1) // this will only happen if wordDict's growth has been stopped
+            tokenList.add(w);
         }
 
-        document.add(tokens);
+        assert tokenList.size() <= nd;
 
-        document.lock();
+        document.setTokens(tokenList.toNativeArray());
         docs.add(document);
       }
     }
