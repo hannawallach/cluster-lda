@@ -96,13 +96,13 @@ public class ClusterWordExperiment {
 
     double[] alpha = new double[] { 20000.0, 1000.0, 10.0 };
 
+    ct.initialize(theta, priorType, max, alpha, W, stateFileName, null, useDocCounts, docs); // initialize the clustering model
+
     for (int s=1; s<=numIterations; s++) {
 
       String itn = Integer.toString(s);
 
       // cluster documents and output final clustering
-
-      ct.initialize(theta, priorType, max, alpha, W, stateFileName, null, useDocCounts, docs);
 
       if (s % saveStateInterval == 0) {
 

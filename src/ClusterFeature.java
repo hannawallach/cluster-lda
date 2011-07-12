@@ -558,8 +558,6 @@ public class ClusterFeature {
     }
 
     theta = Math.exp(rawParam);
-
-    System.out.println("Theta: " + theta);
   }
 
   class Cluster {

@@ -65,7 +65,7 @@ public class ItemLoader {
 
     for (int d=0; d<z.length; d++) {
       if (z[d] == null)
-        System.out.println(d);
+        System.out.println("Error loading item " + d);
 
       assert z[d] != null;
     }
