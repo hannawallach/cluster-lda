@@ -12,7 +12,7 @@ public class ClusterFeature {
 
   // observed counts
 
-  private ClusterFeatureScoreSparse featureScore;
+  private ClusterFeatureScore featureScore;
 
   private int F, D, C; // constants
 
@@ -94,7 +94,7 @@ public class ClusterFeature {
     for (int c=0; c<C; c++)
       clusters[c] = new Cluster(c);
 
-    featureScore = new ClusterFeatureScoreSparse(F, D, C, alpha, unseenCounts, "minimal", useDocCounts);
+    featureScore = new ClusterFeatureScore(F, D, C, alpha, unseenCounts, "minimal", useDocCounts);
 
     // clusterAssignments is an array of D clusters -- remember that
     // because objects are pointers in Java, this is an array of N
@@ -185,7 +185,7 @@ public class ClusterFeature {
 
   public double[] sampleAlpha(int numItns) {
 
-    featureScore.sampleAlpha(clusterAssignments, items, rng, numItns, 1.0);
+    featureScore.sampleAlpha(items, clusterAssignments, rng, numItns, 1.0);
 
     return featureScore.getAlpha();
   }
@@ -459,12 +459,12 @@ public class ClusterFeature {
 
   public void printClusterFeatures(String fileName) {
 
-    featureScore.printClusterFeatures(0.0, -1, fileName);
+    featureScore.print(0.0, -1, fileName);
   }
 
   public double getLogLikelihood() {
 
-    return featureScore.logProb(clusterAssignments, items);
+    return featureScore.logProb(items, clusterAssignments);
   }
 
   public double getLogPrior() {

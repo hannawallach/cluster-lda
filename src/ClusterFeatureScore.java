@@ -9,7 +9,7 @@ import gnu.trove.*;
 import cc.mallet.types.*;
 import cc.mallet.util.Maths;
 
-public class ClusterFeatureScoreSparse {
+public class ClusterFeatureScore {
 
   // observed counts
 
@@ -44,12 +44,12 @@ public class ClusterFeatureScoreSparse {
 
   // create a score function with zero counts
 
-  public ClusterFeatureScoreSparse(int F, int D, int C, double[] alpha, TIntIntHashMap unseenCounts, String score) {
+  public ClusterFeatureScore(int F, int D, int C, double[] alpha, TIntIntHashMap unseenCounts, String score) {
 
     this(F, D, C, alpha, unseenCounts, score, true);
   }
 
-  public ClusterFeatureScoreSparse(int F, int D, int C, double[] alpha, TIntIntHashMap unseenCounts, String score, boolean useDocs) {
+  public ClusterFeatureScore(int F, int D, int C, double[] alpha, TIntIntHashMap unseenCounts, String score, boolean useDocs) {
 
     this.F = F;
     this.D = D;
@@ -311,7 +311,7 @@ public class ClusterFeatureScoreSparse {
 
   // computes log prob using the predictive distribution
 
-  public double logProb(ClusterFeature.Cluster[] assignments, ClusterFeature.Item[] items) {
+  public double logProb(ClusterFeature.Item[] items, ClusterFeature.Cluster[] assignments) {
 
     double logProb = 0;
 
@@ -344,75 +344,6 @@ public class ClusterFeatureScoreSparse {
     return logProb;
   }
 
-  private double logProb(ClusterFeature.Cluster[] assignments, ClusterFeature.Item[] items, double[] newLogAlpha) {
-
-    double[] oldAlpha = alpha.clone();
-
-    for (int i=0; i<alpha.length; i++)
-      alpha[i] = Math.exp(newLogAlpha[i]);
-
-    double logProb = logProb(assignments, items);
-
-    alpha = oldAlpha.clone();
-
-    return logProb;
-  }
-
-  public void sampleAlpha(ClusterFeature.Cluster[] assignments, ClusterFeature.Item[] items, LogRandoms rng, int numIterations, double stepSize) {
-
-    int I = alpha.length;
-
-    double[] rawParam = new double[I];
-    double rawParamSum = 0.0;
-
-    for (int i=0; i<I; i++) {
-      rawParam[i] = Math.log(alpha[i]);
-      rawParamSum += rawParam[i];
-    }
-
-    double[] l = new double[I];
-    double[] r = new double[I];
-
-    for (int s=0; s<numIterations; s++) {
-
-      double lp = logProb(assignments, items, rawParam) + rawParamSum;
-      double lpNew = Math.log(rng.nextUniform()) + lp;
-
-      for (int i=0; i<I; i++) {
-        l[i] = rawParam[i] - rng.nextUniform() * stepSize;
-        r[i] = l[i] + stepSize;
-      }
-
-      double[] rawParamNew = new double[I];
-      double rawParamNewSum = 0.0;
-
-      while (true) {
-
-        rawParamNewSum = 0.0;
-
-        for (int i=0; i<I; i++) {
-          rawParamNew[i] = l[i] + rng.nextUniform() * (r[i] - l[i]);
-          rawParamNewSum += rawParamNew[i];
-        }
-
-        if (logProb(assignments, items, rawParamNew) + rawParamNewSum > lpNew)
-          break;
-        else
-          for (int i=0; i<I; i++)
-            if (rawParamNew[i] < rawParam[i])
-              l[i] = rawParamNew[i];
-            else
-              r[i] = rawParamNew[i];
-      }
-
-      rawParam = rawParamNew;
-      rawParamSum = rawParamNewSum;
-    }
-
-    for (int i=0; i<I; i++)
-      alpha[i] = Math.exp(rawParam[i]);
-  }
-
   public double[] getAlpha() {
 
     return alpha;
@@ -434,7 +365,81 @@ public class ClusterFeatureScoreSparse {
     }
   }
 
-  public void printClusterFeatures(double threshold, int numFeatures, String fileName) {
+  private double logProb(ClusterFeature.Item[] items, ClusterFeature.Cluster[] assignments, double[] newLogAlpha) {
+
+    double[] oldAlpha = alpha.clone();
+
+    for (int i=0; i<alpha.length; i++)
+      alpha[i] = Math.exp(newLogAlpha[i]);
+
+    double logProb = logProb(items, assignments);
+
+    alpha = oldAlpha.clone();
+
+    return logProb;
+  }
+
+  public void sampleAlpha(ClusterFeature.Item[] items, ClusterFeature.Cluster[] assignments, LogRandoms rng, int numIterations, double stepSize) {
+
+    int I = alpha.length;
+
+    double[] rawParam = new double[I];
+    double rawParamSum = 0.0;
+
+    for (int i=0; i<I; i++) {
+      rawParam[i] = Math.log(alpha[i]);
+      rawParamSum += rawParam[i];
+    }
+
+    double[] l = new double[I];
+    double[] r = new double[I];
+
+    for (int s=0; s<numIterations; s++) {
+
+      double lp = logProb(items, assignments, rawParam) + rawParamSum;
+      double lpNew = Math.log(rng.nextUniform()) + lp;
+
+      for (int i=0; i<I; i++) {
+        l[i] = rawParam[i] - rng.nextUniform() * stepSize;
+        r[i] = l[i] + stepSize;
+      }
+
+      double[] rawParamNew = new double[I];
+      double rawParamNewSum = 0.0;
+
+      while (true) {
+
+        rawParamNewSum = 0.0;
+
+        for (int i=0; i<I; i++) {
+          rawParamNew[i] = l[i] + rng.nextUniform() * (r[i] - l[i]);
+          rawParamNewSum += rawParamNew[i];
+        }
+
+        if (logProb(items, assignments, rawParamNew) + rawParamNewSum > lpNew)
+          break;
+        else
+          for (int i=0; i<I; i++)
+            if (rawParamNew[i] < rawParam[i])
+              l[i] = rawParamNew[i];
+            else
+              r[i] = rawParamNew[i];
+      }
+
+      rawParam = rawParamNew;
+      rawParamSum = rawParamNewSum;
+    }
+
+    for (int i=0; i<I; i++)
+      alpha[i] = Math.exp(rawParam[i]);
+  }
+
+  public void print(String fileName) {
+
+    print(0.0, -1, fileName);
+  }
+
+  public void print(double threshold, int numFeatures, String fileName) {
 
     try {
 
@@ -442,50 +447,41 @@ public class ClusterFeatureScoreSparse {
 
       pw.println("#cluster feature proportion ...");
 
-      double[] dist = new double[F];
+      Probability[] probs = new Probability[F];
 
       int clusterNum = 0;
 
       for (int c=0; c<C; c++) {
 
-        boolean empty = true;
-
         for (int f=0; f<F; f++)
-          dist[f] = getClusterScoreNoPrior(f, c);
+          probs[f] = new Probability(f, getClusterScoreNoPrior(f, c));
+
+        Arrays.sort(probs);
+
+        if (probs[0].prob == 0)
+          continue;
+        else {
+
+          pw.print(clusterNum); pw.print(" ");
+          clusterNum++;
+        }
 
         if ((numFeatures > F) || (numFeatures < 0))
           numFeatures = F;
 
-        for (int t=0; t<numFeatures; t++) {
-
-          double max = 0.0;
-          int index = -1;
-
-          for (int f=0; f<F; f++) {
-
-            if (dist[f] > max) {
-              max = dist[f];
-              index = f;
-            }
-          }
+        for (int i=0; i<numFeatures; i++) {
 
           // break if there are no more features whose proportion is
           // greater than zero or threshold...
 
-          if ((index == -1) || (dist[index] < threshold))
+          if ((probs[i].prob == 0) || (probs[i].prob < threshold))
             break;
 
-          if (empty) {
-            pw.print(clusterNum); pw.print(" ");
-            empty = false;
-            clusterNum++;
-          }
-          pw.print(index + " " + dist[index] + " ");
-          dist[index] = 0;
+          pw.print(probs[i].index); pw.print(" ");
+          pw.print(probs[i].prob); pw.print(" ");
         }
 
-        if (!empty)
-          pw.println();
+        pw.println();
       }
 
       pw.close();
