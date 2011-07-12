@@ -442,9 +442,11 @@ public class ClusterFeatureScoreSparse {
 
       double[] dist = new double[F];
 
+      int clusterNum = 0;
+
       for (int c=0; c<C; c++) {
 
-        pw.print(c); pw.print(" ");
+        boolean empty = true;
 
         for (int f=0; f<F; f++)
           dist[f] = getClusterScoreNoPrior(f, c);
@@ -471,11 +473,17 @@ public class ClusterFeatureScoreSparse {
           if ((index == -1) || (dist[index] < threshold))
             break;
 
+          if (empty) {
+            pw.print(clusterNum); pw.print(" ");
+            empty = false;
+            clusterNum++;
+          }
           pw.print(index + " " + dist[index] + " ");
           dist[index] = 0;
         }
 
-        pw.println();
+        if (!empty)
+          pw.println();
       }
 
       pw.close();
