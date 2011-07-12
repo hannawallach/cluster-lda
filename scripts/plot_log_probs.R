@@ -14,11 +14,31 @@ for (id in 1:num_runs) {
   file <- paste(results_dir, '/log_prob.txt', sep="")
   data <- read.table(file, header=FALSE)
   if (id == 1) {
-     plot(data$V1, type="l");
+    ymin <- min(data$V1 + data$V2)
+    ymax <- max(data$V1 + data$V2)
   }
   else {
-     lines(data$V1);
+    ymin <- min(ymin, min(data$V1 + data$V2))
+    ymax <- max(ymax, max(data$V1 + data$V2))
   }
 }
+
+for (id in 1:num_runs) {
+  results_dir <- paste(results_dir_base, id, sep="")
+  file <- paste(results_dir, '/log_prob.txt', sep="")
+  data <- read.table(file, header=FALSE)
+  if (id == 1) {
+    plot(data$V1 + data$V2, type="l", ylab="Log Likelihood + Log Prior", xlab="", xaxt="n", ylim=c(ymin, ymax));
+    all_data <- data$V1 + data$V2
+  }
+  else {
+    lines(data$V1 + data$V2);
+    all_data <- all_data + data$V1 + data$V2
+  }
+}
+
+all_data <- all_data / as.numeric(num_runs)
+
+lines(all_data, lwd=2, col="red")
 
 dev.off()
