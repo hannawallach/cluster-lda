@@ -74,8 +74,6 @@ extract-features: $(BUILD_DIR)
 	edu.umass.cs.wallach.cluster.ExtractTopFeatures \
 	$(INPUT_FILE) \
 	$(FEATURES_FILE) \
-	$(C) \
-	$(F) \
 	$(NUM)
 
 clean:
