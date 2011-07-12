@@ -1,44 +1,42 @@
 package edu.umass.cs.wallach.cluster;
 
-import gnu.trove.*;
 import java.io.*;
+import java.util.*;
+import java.util.zip.*;
+
+import gnu.trove.*;
 
 public class ExtractTopFeatures {
 
   private TIntObjectHashMap alphabet;
 
-  private int C, T, numTopFeatures;
+  private int numTopFeatures;
 
-  public ExtractTopFeatures(int C, int T, int numTopFeatures) {
-
-    this.C = C;
-    this.T = T;
+  public ExtractTopFeatures(int numTopFeatures) {
 
     this.numTopFeatures = numTopFeatures;
 
     alphabet = new TIntObjectHashMap();
   }
 
-  public void processFile(String inputFileName, String featureFileName) {
+  public void processFile(String inputFileName, String featuresFileName) {
 
     try {
 
-      BufferedReader buf = new BufferedReader(new FileReader(featureFileName));
+      BufferedReader in = new BufferedReader(new FileReader(featuresFileName));
 
       String line = null;
-      String[] tokens = null;
+      String[] fields = null;
 
       int numFeaturesProcessed = 0;
 
-      while ((line = buf.readLine()) != null) {
-        if (line.equals(""))
-          continue;
+      while ((line = in.readLine()) != null) {
 
-        tokens = line.split("\\s+");
+        fields = line.split("\\s+");
 
-        assert tokens[0].equals("Feature");
+        assert fields[0].equals("Feature");
 
-        int t = Integer.parseInt(tokens[1].substring(0, tokens[1].length()-1));
+        int t = Integer.parseInt(fields[1].substring(0, fields[1].length()-1));
 
         assert numFeaturesProcessed == t;
 
@@ -47,53 +45,53 @@ public class ExtractTopFeatures {
         numFeaturesProcessed++;
       }
 
-      assert numFeaturesProcessed == T;
+      in.close();
 
-      buf.close();
-
-      buf = new BufferedReader(new FileReader(inputFileName));
+      in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(new File(inputFileName)))));
 
       int c = 0;
 
       line = null;
-      tokens = null;
+      fields = null;
 
-      line = buf.readLine(); // discard first line....
+      line = in.readLine(); // discard first line....
 
-      while ((line = buf.readLine()) != null) {
-        if (line.equals(""))
+      while ((line = in.readLine()) != null) {
+        if (line.startsWith("#"))
           continue;
 
-        tokens = line.split("\\s+");
+        fields = line.split("\\s+");
 
-        if (tokens.length > 1) {
+        // each line consists of cluster feature proportion ...
 
-          System.out.println("\nCluster " + tokens[0] + ":\n");
+        if (fields.length <= 1)
+          continue;
 
-          int j = -1;
-          double p;
+        System.out.println("\nCluster " + fields[0] + ":\n");
 
-          numFeaturesProcessed = 0;
+        int j = -1;
+        double p;
 
-          for (int i=1; i<tokens.length; i++) {
+        numFeaturesProcessed = 0;
 
-            if (numFeaturesProcessed >= numTopFeatures)
-              continue;
+        for (int i=1; i<fields.length; i++) {
 
-            if (i % 2 == 1)
-              j = Integer.parseInt(tokens[i]); // this is a feature
-            else {
+          if (numFeaturesProcessed >= numTopFeatures)
+            continue;
 
-              System.out.println(alphabet.get(j) + "\n");
-              numFeaturesProcessed++;
-            }
+          if (i % 2 == 1)
+            j = Integer.parseInt(fields[i]); // this is a feature
+          else {
+
+            System.out.println(alphabet.get(j) + "\n");
+            numFeaturesProcessed++;
           }
-
-          c++;
         }
+
+        c++;
       }
 
-      assert c == C;
+      System.out.println("Processed " + c + " clusters");
     }
     catch (IOException e) {
       System.out.println(e);
@@ -102,21 +100,18 @@ public class ExtractTopFeatures {
 
   public static void main(String[] args) throws java.io.IOException {
 
-    if (args.length < 5) {
-      System.err.println("Usage: ExtractTopFeatures <cluster_feature_file> <feature_file> <num_clusters> <num_features> <num_top_features>");
+    if (args.length != 3) {
+      System.err.println("Usage: ExtractTopFeatures <cluster_features_file> <feature_keys_file> <num_top_features>");
       System.exit(1);
     }
 
     String inputFileName = args[0];
-    String featureFileName = args[1];
+    String featuresFileName = args[1];
 
-    int C = Integer.parseInt(args[2]);
-    int T = Integer.parseInt(args[3]);
+    int numTopFeatures = Integer.parseInt(args[2]);
 
-    int numTopFeatures = Integer.parseInt(args[4]);
+    ExtractTopFeatures extract = new ExtractTopFeatures(numTopFeatures);
 
-    ExtractTopFeatures extract = new ExtractTopFeatures(C, T, numTopFeatures);
-
-    extract.processFile(inputFileName, featureFileName);
+    extract.processFile(inputFileName, featuresFileName);
   }
 }
