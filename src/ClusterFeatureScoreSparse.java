@@ -388,6 +388,8 @@ public class ClusterFeatureScoreSparse {
 
       while (true) {
 
+        rawParamNewSum = 0.0;
+
         for (int i=0; i<I; i++) {
           rawParamNew[i] = l[i] + rng.nextUniform() * (r[i] - l[i]);
           rawParamNewSum += rawParamNew[i];
