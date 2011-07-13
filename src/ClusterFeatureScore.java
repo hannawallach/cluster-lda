@@ -113,6 +113,28 @@ public class ClusterFeatureScore {
     return score;
   }
 
+  public double getScoreNoPrior(int f, int d) {
+
+    assert useDocs;
+
+    int nd = featureItemCountsNorm[d];
+
+    if (nd == 0)
+      return 0.0;
+    else {
+
+      long index = ((long) f * D) + d;
+
+      double score = (double) featureItemCounts.get(index) / (double) nd;
+
+      if (unseenCounts != null)
+        if (unseenCounts.containsKey(f))
+          score /= (double) unseenCounts.get(f);
+
+      return score;
+    }
+  }
+
   public double getClusterScoreNoPrior(int f, int c) {
 
     int nc = featureClusterCountsNorm[c];
@@ -313,7 +335,7 @@ public class ClusterFeatureScore {
 
   public double logProb(ClusterFeature.Item[] items, ClusterFeature.Cluster[] assignments) {
 
-    double logProb = 0;
+    double logProb = 0.0;
 
     resetCounts();
 
@@ -452,7 +474,6 @@ public class ClusterFeatureScore {
       int clusterNum = 0;
 
       for (int c=0; c<C; c++) {
-
         for (int f=0; f<F; f++)
           probs[f] = new Probability(f, getClusterScoreNoPrior(f, c));
 
