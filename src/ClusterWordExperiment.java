@@ -32,11 +32,11 @@ public class ClusterWordExperiment {
   public static void main(String[] args) throws java.io.IOException {
 
     if (args.length != 10) {
-      System.out.println("Usage: ClusterWordExperiment <data> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <sample_conc_param> <use_doc_counts> <prior_type> <output_dir>");
+      System.out.println("Usage: ClusterWordExperiment <instance_list> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <sample_conc_param> <use_doc_counts> <prior_type> <output_dir>");
       System.exit(1);
     }
 
-    String fileName = args[0];
+    String instanceListFileName = args[0];
 
     int C = Integer.parseInt(args[1]); // # clusters to use intially
 
@@ -57,13 +57,13 @@ public class ClusterWordExperiment {
 
     String outputDir = args[9]; // output directory
 
-    String stateFileName = outputDir + "/state.txt.gz";
+    String featuresFileName = outputDir + "/features.txt.gz";
 
     Alphabet wordDict = new Alphabet();
 
     Corpus docs = new Corpus(wordDict, null);
 
-    InstanceListLoader.load(fileName, docs);
+    InstanceListLoader.load(instanceListFileName, docs);
 
     int W = wordDict.size();
 
@@ -85,7 +85,7 @@ public class ClusterWordExperiment {
     for (int d=0; d<docs.size(); d++)
       z[d] = docs.getDocument(d).getTokens().clone();
 
-    docs.printFeatures(z, stateFileName);
+    docs.printFeatures(z, featuresFileName);
 
     getClusteredCorpus(docs, C);
 
@@ -97,7 +97,7 @@ public class ClusterWordExperiment {
 
     double[] alpha = new double[] { 20000.0, 1000.0, 10.0 };
 
-    ct.initialize(theta, priorType, max, alpha, W, stateFileName, null, useDocCounts, docs); // initialize the clustering model
+    ct.initialize(theta, priorType, max, alpha, W, featuresFileName, null, useDocCounts, docs); // initialize the clustering model
 
     for (int s=1; s<=numIterations; s++) {
 

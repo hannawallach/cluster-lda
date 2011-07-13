@@ -12,11 +12,11 @@ public class LDAExperiment {
   public static void main(String[] args) throws java.io.IOException {
 
     if (args.length != 7) {
-      System.out.println("Usage: LDAExperiment <data> <num_topics> <num_itns> <print_interval> <save_state_interval> <sample> <output_dir>");
+      System.out.println("Usage: LDAExperiment <instance_list> <num_topics> <num_itns> <print_interval> <save_state_interval> <sample> <output_dir>");
       System.exit(1);
     }
 
-    String fileName = args[0];
+    String instanceListFileName = args[0];
 
     int T = Integer.parseInt(args[1]); // # of topics
 
@@ -42,7 +42,7 @@ public class LDAExperiment {
 
     Corpus docs = new Corpus(wordDict, null);
 
-    InstanceListLoader.load(fileName, docs);
+    InstanceListLoader.load(instanceListFileName, docs);
 
     int W = wordDict.size();
 
@@ -63,14 +63,14 @@ public class LDAExperiment {
 
     PrintWriter pw = new PrintWriter(optionsFileName);
 
-    pw.println("Data = " + fileName);
+    pw.println("Instance list = " + instanceListFileName);
 
     int corpusLength = 0;
 
     for (int d=0; d<docs.size(); d++)
       corpusLength += docs.getDocument(d).getLength();
 
-    pw.println("Tokens in data = " + corpusLength);
+    pw.println("# tokens = " + corpusLength);
 
     pw.println("T = " + T);
     pw.println("# iterations = " + numIterations);
