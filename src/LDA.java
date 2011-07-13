@@ -166,9 +166,7 @@ public class LDA {
 
         if (saveStateInterval != 0) {
           if (s % saveStateInterval == 0) {
-
             docs.printFeatures(z, stateFileName + "." + s);
-
             topicScore.printAlpha(alphaFileName + "." + s);
             wordScore.printBeta(betaFileName + "." + s);
           }
@@ -177,9 +175,10 @@ public class LDA {
 
       Timer.printTimingInfo(start, System.currentTimeMillis());
 
-      if (saveStateInterval != 0) {
-        documentTopicsFileName = documentTopicsFileName + "." + numItns;
-        topicWordsFileName = topicWordsFileName + "." + numItns;
+      if (saveStateInterval == 0) {
+        docs.printFeatures(z, stateFileName);
+        topicScore.printAlpha(alphaFileName);
+        wordScore.printBeta(betaFileName);
       }
 
       topicScore.print(docs, documentTopicsFileName);
