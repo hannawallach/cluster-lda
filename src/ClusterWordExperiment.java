@@ -28,7 +28,7 @@ public class ClusterWordExperiment {
       docs.getDocument(d).setCluster(clusterAssignments[d].ID);
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws java.io.IOException {
 
     if (args.length != 10) {
       System.out.println("Usage: ClusterWordExperiment <data> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <sample_conc_param> <use_doc_counts> <prior_type> <output_dir>");
