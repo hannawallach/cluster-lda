@@ -55,6 +55,7 @@ public class LDAExperiment {
 
     String documentTopicsFileName = outputDir + "/doc_topics.txt.gz";
     String topicWordsFileName = outputDir + "/topic_words.txt.gz";
+    String topicSummaryFileName = outputDir + "/topic_summary.txt.gz";
     String stateFileName = outputDir + "/state.txt.gz";
     String alphaFileName = outputDir + "/alpha.txt";
     String betaFileName = outputDir + "/beta.txt";
@@ -83,7 +84,7 @@ public class LDAExperiment {
 
     LDA lda = new LDA();
 
-    lda.estimate(docs, null, T, alpha, beta, numIterations, printInterval, saveStateInterval, sample, documentTopicsFileName, topicWordsFileName, stateFileName, alphaFileName, betaFileName, logProbFileName);
+    lda.estimate(docs, null, T, alpha, beta, numIterations, printInterval, saveStateInterval, sample, documentTopicsFileName, topicWordsFileName, topicSummaryFileName, stateFileName, alphaFileName, betaFileName, logProbFileName);
 
   }
 }

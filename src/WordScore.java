@@ -250,10 +250,10 @@ public class WordScore {
 
   public void print(Alphabet dict, String fileName) {
 
-    print(dict, 0.0, -1, fileName);
+    print(dict, 0.0, -1, false, fileName);
   }
 
-  public void print(Alphabet dict, double threshold, int numWords, String fileName) {
+  public void print(Alphabet dict, double threshold, int numWords, boolean summary, String fileName) {
 
     assert dict.size() == W;
 
@@ -267,7 +267,8 @@ public class WordScore {
 
         pw = new PrintStream(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(new File(fileName)))));
 
-        pw.println("#topic typeindex type proportion");
+        if (!summary)
+          pw.println("#topic typeindex type proportion");
       }
 
       Probability[] probs = new Probability[W];
@@ -291,7 +292,7 @@ public class WordScore {
           if ((probs[i].prob == 0) || (probs[i].prob < threshold))
             break;
 
-          if (fileName == null) {
+          if ((fileName == null) || summary){
             line.append(dict.lookupObject(probs[i].index));
             line.append(" ");
           }
@@ -305,7 +306,7 @@ public class WordScore {
 
         String string = line.toString();
 
-        if (fileName == null)
+        if ((fileName == null) || summary)
           if (!string.equals(""))
             pw.println("Topic " + j + ": " + string);
       }

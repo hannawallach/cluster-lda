@@ -104,7 +104,7 @@ public class LDA {
 
   // estimate topics
 
-  public void estimate(Corpus docs, TIntIntHashMap unseenCounts, int T, double alpha, double beta, int numItns, int printInterval, int saveStateInterval, boolean[] sample, String documentTopicsFileName, String topicWordsFileName, String stateFileName, String alphaFileName, String betaFileName, String logProbFileName) {
+  public void estimate(Corpus docs, TIntIntHashMap unseenCounts, int T, double alpha, double beta, int numItns, int printInterval, int saveStateInterval, boolean[] sample, String documentTopicsFileName, String topicWordsFileName, String topicSummaryFileName, String stateFileName, String alphaFileName, String betaFileName, String logProbFileName) {
 
     Alphabet wordDict = docs.getWordDict();
 
@@ -157,7 +157,7 @@ public class LDA {
         if (printInterval != 0) {
           if (s % printInterval == 0) {
             System.out.println();
-            wordScore.print(wordDict, 0.0, 10, null);
+            wordScore.print(wordDict, 0.0, 10, true, null);
 
             logProbWriter.println(logProb(docs));
             logProbWriter.flush();
@@ -183,6 +183,8 @@ public class LDA {
 
       topicScore.print(docs, documentTopicsFileName);
       wordScore.print(wordDict, topicWordsFileName);
+
+      wordScore.print(wordDict, 0.0, 10, true, topicSummaryFileName);
     }
     catch (IOException e) {
       System.out.println(e);
