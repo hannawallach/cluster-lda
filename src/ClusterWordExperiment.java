@@ -57,7 +57,7 @@ public class ClusterWordExperiment {
 
     String outputDir = args[9]; // output directory
 
-    String featuresFileName = outputDir + "/features.txt.gz";
+    String featureUsageFileName = outputDir + "/feature_usage.txt.gz";
 
     Alphabet wordDict = new Alphabet();
 
@@ -85,7 +85,7 @@ public class ClusterWordExperiment {
     for (int d=0; d<docs.size(); d++)
       z[d] = docs.getDocument(d).getTokens().clone();
 
-    docs.printFeatures(z, featuresFileName);
+    docs.printFeatures(z, featureUsageFileName);
 
     getClusteredCorpus(docs, C);
 
@@ -97,7 +97,7 @@ public class ClusterWordExperiment {
 
     double[] alpha = new double[] { 20000.0, 1000.0, 10.0 };
 
-    ct.initialize(theta, priorType, max, alpha, W, featuresFileName, null, useDocCounts, docs); // initialize the clustering model
+    ct.initialize(theta, priorType, max, alpha, W, featureUsageFileName, null, useDocCounts, docs); // initialize the clustering model
 
     for (int s=1; s<=numIterations; s++) {
 
