@@ -39,6 +39,21 @@ $(DATA_DIR)/patents/%.dat: $(DATA_DIR)/patents/%
 	--output $@ \
 	--input $<
 
+$(RESULTS_DIR)/lda/%/T$(T)-S$(S)-SAMPLE$(SAMPLE)-ID$(ID):
+	mkdir -p $@; \
+	I=`expr $(S) / 10`; \
+	java $(JAVA_FLAGS) \
+	-classpath $(CP) \
+        edu.umass.cs.wallach.cluster.LDAExperiment \
+	$(DATA_DIR)/patents/$*.dat \
+	$(T) \
+	$(S) \
+	20 \
+	$$I \
+	$(SAMPLE) \
+	$@ \
+	> $@/stdout.txt
+
 $(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(SG) / 10`; \
@@ -56,7 +71,6 @@ $(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOC
 	$(PRIOR) \
 	$@ \
 	> $@/stdout.txt
-
 
 $(RESULTS_DIR)/cluster/%/num_clusters.txt:
 	./$(SCRIPTS_DIR)/aggregate_num_clusters.sh > $@
