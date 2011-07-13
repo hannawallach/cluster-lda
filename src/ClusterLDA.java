@@ -186,7 +186,7 @@ public class ClusterLDA {
         wordScore.printBeta(betaFileName);
       }
 
-      topicScore.printClusterTopics(clusterTopicsFileName);
+      topicScore.print(clusterTopicsFileName);
       topicScore.print(docs, documentTopicsFileName);
       wordScore.print(wordDict, topicWordsFileName);
     }

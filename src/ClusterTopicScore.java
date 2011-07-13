@@ -352,6 +352,8 @@ public class ClusterTopicScore {
 
       for (int d=0; d<D; d++) {
 
+        int c = docs.getDocument(d).getCluster();
+
         pw.print(d); pw.print(" ");
         pw.print(docs.getDocument(d).getSource()); pw.print(" ");
 
