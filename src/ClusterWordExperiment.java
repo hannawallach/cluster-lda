@@ -2,6 +2,7 @@ package edu.umass.cs.wallach.cluster;
 
 import java.io.*;
 import java.util.*;
+import java.util.zip.*;
 
 import gnu.trove.*;
 
@@ -68,7 +69,7 @@ public class ClusterWordExperiment {
 
     try {
 
-      PrintWriter pw = new PrintWriter(outputDir + "/features.txt");
+      PrintStream pw = new PrintStream(new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(new File(outputDir + "/feature_summary.txt.gz")))));
 
       for (int w=0; w<W; w++)
         pw.println("Feature " + w + ": " + wordDict.lookupObject(w));
