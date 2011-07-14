@@ -40,14 +40,14 @@ public class ClusterTopicScore {
 
   // create a score function with zero counts
 
-  public ClusterTopicScore(int T, int D, int C, double alpha, String score) {
+  public ClusterTopicScore(int T, int D, int C, double[] alpha, String score) {
 
     this.T = T;
     this.D = D;
     this.C = C;
 
-    this.alpha = new double[3];
-    Arrays.fill(this.alpha, alpha);
+    assert alpha.length == 3;
+    this.alpha = alpha;
 
     this.score = score;
 

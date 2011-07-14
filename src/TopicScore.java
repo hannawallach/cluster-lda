@@ -34,13 +34,13 @@ public class TopicScore {
 
   // create a score function with zero counts
 
-  public TopicScore(int T, int D, double alpha, String score) {
+  public TopicScore(int T, int D, double[] alpha, String score) {
 
     this.T = T;
     this.D = D;
 
-    this.alpha = new double[2];
-    Arrays.fill(this.alpha, alpha);
+    assert alpha.length == 2;
+    this.alpha = alpha;
 
     this.score = score;
 

@@ -46,8 +46,11 @@ public class LDAExperiment {
 
     int W = wordDict.size();
 
-    double alpha = 0.1 * T;
-    double beta = 0.01 * W;
+    double[] alpha = new double[2];
+    Arrays.fill(alpha, 0.1 * T);
+
+    double[] beta = new double[1];
+    Arrays.fill(beta, 0.01 * W);
 
     // form output filenames
 
@@ -84,7 +87,7 @@ public class LDAExperiment {
 
     LDA lda = new LDA();
 
-    lda.estimate(docs, null, T, alpha, beta, numIterations, printInterval, saveStateInterval, sample, documentTopicsFileName, topicWordsFileName, topicSummaryFileName, stateFileName, alphaFileName, betaFileName, logProbFileName);
+    lda.estimate(docs, null, null, 0, T, alpha, beta, numIterations, printInterval, saveStateInterval, sample, documentTopicsFileName, topicWordsFileName, topicSummaryFileName, stateFileName, alphaFileName, betaFileName, logProbFileName);
 
   }
 }

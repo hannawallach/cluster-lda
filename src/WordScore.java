@@ -31,13 +31,13 @@ public class WordScore {
 
   // create a score function with zero counts
 
-  public WordScore(int W, int T, double beta, TIntIntHashMap unseenCounts) {
+  public WordScore(int W, int T, double[] beta, TIntIntHashMap unseenCounts) {
 
     this.W = W;
     this.T = T;
 
-    this.beta = new double[1];
-    Arrays.fill(this.beta, beta);
+    assert beta.length == 1;
+    this.beta = beta;
 
     this.unseenCounts = unseenCounts;
 

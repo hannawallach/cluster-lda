@@ -108,7 +108,16 @@ public class ClusterLDA {
 
   // estimate topics
 
-  public void estimate(Corpus docs, TIntIntHashMap unseenCounts, int T, int C, double alpha, double beta, int numItns, int printInterval, int saveStateInterval, boolean[] sample, String clusterTopicsFileName, String documentTopicsFileName, String topicWordsFileName, String topicSummaryFileName, String stateFileName, String alphaFileName, String betaFileName, String logProbFileName) {
+  public void estimate(Corpus docs, TIntIntHashMap unseenCounts, int[][] z, int itnOffset, int T, int C, double[] alpha, double[] beta, int numItns, int printInterval, int saveStateInterval, boolean[] sample, String clusterTopicsFileName, String documentTopicsFileName, String topicWordsFileName, String topicSummaryFileName, String stateFileName, String alphaFileName, String betaFileName, String logProbFileName) {
+
+    boolean append = false;
+
+    if (z == null)
+      assert itnOffset == 0;
+    else {
+      assert itnOffset >= 0;
+      append = true;
+    }
 
     Alphabet wordDict = docs.getWordDict();
 
@@ -129,15 +138,39 @@ public class ClusterLDA {
     wordScore = new WordScore(W, T, beta, unseenCounts);
     topicScore = new ClusterTopicScore(T, D, C, alpha, "minimal");
 
-    z = new int[D][];
+    if (z == null) {
+
+      this.z = new int[D][];
+      sampleTopics(docs, true); // initialize topic assignments
+    }
+    else {
+
+      this.z = z;
+
+      for (int d=0; d<D; d++) {
+
+        int c = docs.getDocument(d).getCluster();
+
+        int[] fs = docs.getDocument(d).getTokens();
+
+        int nd = fs.length;
+
+        for (int i=0; i<nd; i++) {
+
+          int w = fs[i];
+          int topic = z[d][i];
+
+          wordScore.incrementCounts(w, topic);
+          topicScore.incrementCounts(topic, d, c);
+        }
+      }
+    }
 
     long start = System.currentTimeMillis();
 
-    sampleTopics(docs, true);
-
     try {
 
-      PrintWriter logProbWriter = new PrintWriter(logProbFileName);
+      PrintWriter logProbWriter = new PrintWriter(new FileWriter(logProbFileName), append);
 
       // count matrices have been populated, every token has been
       // assigned to a single topic, so Gibbs sampling can start
@@ -171,9 +204,9 @@ public class ClusterLDA {
 
         if (saveStateInterval != 0) {
           if (s % saveStateInterval == 0) {
-            docs.printFeatures(z, stateFileName + "." + s);
-            topicScore.printAlpha(alphaFileName + "." + s);
-            wordScore.printBeta(betaFileName + "." + s);
+            docs.printFeatures(z, stateFileName + "." + (itnOffset + s));
+            topicScore.printAlpha(alphaFileName + "." + (itnOffset + s));
+            wordScore.printBeta(betaFileName + "." + (itnOffset + s));
           }
         }
       }
