@@ -30,6 +30,6 @@ public class HyperparamLoader {
       System.out.println(e);
     }
 
-    assert assert currentPosition == hyperparam.length;
+    assert currentPosition == hyperparam.length;
   }
 }
