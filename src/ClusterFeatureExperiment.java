@@ -73,7 +73,8 @@ public class ClusterFeatureExperiment {
 
     int max = docs.size();
 
-    double[] alpha = new double[] { 20000.0, 1000.0, 10.0 };
+    double[] alpha = new double[3];
+    Arrays.fill(alpha, 0.1 * F);
 
     ct.initialize(theta, priorType, max, alpha, F, featureUsageFileName, null, useDocCounts, docs); // initialize the clustering model
 
