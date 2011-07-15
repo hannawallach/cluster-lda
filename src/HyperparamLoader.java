@@ -5,11 +5,9 @@ import java.util.*;
 
 public class HyperparamLoader {
 
-  public static void load(int N, String fileName, double[] hyperparam) {
+  public static void load(String fileName, double[] hyperparam) {
 
     int currentPosition = 0;
-
-    assert hyperparam.length == N;
 
     try {
 
@@ -32,6 +30,6 @@ public class HyperparamLoader {
       System.out.println(e);
     }
 
-    assert currentPosition == N;
+    assert assert currentPosition == hyperparam.length;
   }
 }
