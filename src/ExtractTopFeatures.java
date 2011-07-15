@@ -105,10 +105,14 @@ public class ExtractTopFeatures {
       System.exit(1);
     }
 
-    String inputFileName = args[0];
-    String featuresFileName = args[1];
+    int index = 0;
 
-    int numTopFeatures = Integer.parseInt(args[2]);
+    String inputFileName = args[index++];
+    String featuresFileName = args[index++];
+
+    int numTopFeatures = Integer.parseInt(args[index++]);
+
+    assert index == 3;
 
     ExtractTopFeatures extract = new ExtractTopFeatures(numTopFeatures);
 

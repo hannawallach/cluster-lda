@@ -36,28 +36,32 @@ public class ClusterFeatureExperiment {
       System.exit(1);
     }
 
-    String instanceListFileName = args[0];
-    String featureUsageFileName = args[1];
+    int index = 0;
 
-    int F = Integer.parseInt(args[2]); // total # features
-    int C = Integer.parseInt(args[3]); // # clusters to use intially
+    String instanceListFileName = args[index++];
+    String featureUsageFileName = args[index++];
 
-    int numIterations = Integer.parseInt(args[4]);
-    int numClusterIterations = Integer.parseInt(args[5]);
+    int F = Integer.parseInt(args[index++]); // total # features
+    int C = Integer.parseInt(args[index++]); // # clusters to use intially
 
-    int saveStateInterval = Integer.parseInt(args[6]);
+    int numIterations = Integer.parseInt(args[index++]);
+    int numClusterIterations = Integer.parseInt(args[index++]);
 
-    double theta = Double.parseDouble(args[7]);
+    int saveStateInterval = Integer.parseInt(args[index++]);
 
-    boolean sampleConcentrationParameter = Boolean.valueOf(args[8]);
+    double theta = Double.parseDouble(args[index++]);
 
-    boolean useDocCounts = Boolean.valueOf(args[9]);
+    boolean sampleConcentrationParameter = Boolean.valueOf(args[index++]);
 
-    String priorType = args[10]; // type of prior
+    boolean useDocCounts = Boolean.valueOf(args[index++]);
+
+    String priorType = args[index++]; // type of prior
 
     assert priorType.equals("UP") || priorType.equals("DP");
 
-    String outputDir = args[11]; // output directory
+    String outputDir = args[index++]; // output directory
+
+    assert index == 12;
 
     Alphabet wordDict = new Alphabet();
 

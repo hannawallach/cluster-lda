@@ -16,25 +16,29 @@ public class LDAExperiment {
       System.exit(1);
     }
 
-    String instanceListFileName = args[0];
+    int index = 0;
 
-    int T = Integer.parseInt(args[1]); // # of topics
+    String instanceListFileName = args[index++];
 
-    int numIterations = Integer.parseInt(args[2]); // # Gibbs iterations
-    int printInterval = Integer.parseInt(args[3]); // # iterations between printing out topics
-    int saveStateInterval = Integer.parseInt(args[4]);
+    int T = Integer.parseInt(args[index++]); // # of topics
 
-    assert args[5].length() == 2;
+    int numIterations = Integer.parseInt(args[index++]); // # Gibbs iterations
+    int printInterval = Integer.parseInt(args[index++]); // # iterations between printing out topics
+    int saveStateInterval = Integer.parseInt(args[index++]);
+
+    assert args[index++].length() == 2;
     boolean[] sample = new boolean[2]; // whether to sample hyperparameters
 
     for (int i=0; i<2; i++)
-      switch(args[5].charAt(i)) {
+      switch(args[index++].charAt(i)) {
       case '0': sample[i] = false; break;
       case '1': sample[i] = true; break;
       default: System.exit(1);
       }
 
-    String outputDir = args[6]; // output directory
+    String outputDir = args[index++]; // output directory
+
+    assert index == 7;
 
     // load data
 
