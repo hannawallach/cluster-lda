@@ -44,6 +44,11 @@ public class ClusterFeature {
     return theta;
   }
 
+  public int getNumClusters() {
+
+    return (C - emptyClusterStack.size());
+  }
+
   public ClusterFeature() {
 
     this.rng = new LogRandoms();
