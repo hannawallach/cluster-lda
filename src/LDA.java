@@ -104,11 +104,11 @@ public class LDA {
 
   // estimate topics
 
-  public void estimate(Corpus docs, TIntIntHashMap unseenCounts, int[][] z, int itnOffset, int T, double[] alpha, double[] beta, int numItns, int printInterval, int saveStateInterval, boolean[] sample, String documentTopicsFileName, String topicWordsFileName, String topicSummaryFileName, String stateFileName, String alphaFileName, String betaFileName, String logProbFileName) {
+  public void estimate(Corpus docs, TIntIntHashMap unseenCounts, int[][] zInit, int itnOffset, int T, double[] alpha, double[] beta, int numItns, int printInterval, int saveStateInterval, boolean[] sample, String documentTopicsFileName, String topicWordsFileName, String topicSummaryFileName, String stateFileName, String alphaFileName, String betaFileName, String logProbFileName) {
 
     boolean append = false;
 
-    if (z == null)
+    if (zInit == null)
       assert itnOffset == 0;
     else {
       assert itnOffset >= 0;
@@ -133,14 +133,14 @@ public class LDA {
     wordScore = new WordScore(W, T, beta, unseenCounts);
     topicScore = new TopicScore(T, D, alpha, "minimal");
 
-    if (z == null) {
+    if (zInit == null) {
 
-      this.z = new int[D][];
+      z = new int[D][];
       sampleTopics(docs, true); // initialize topic assignments
     }
     else {
 
-      this.z = z;
+      z = zInit;
 
       for (int d=0; d<D; d++) {
 
