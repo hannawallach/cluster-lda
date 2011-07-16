@@ -170,7 +170,7 @@ public class ClusterLDA {
 
     try {
 
-      PrintWriter logProbWriter = new PrintWriter(new FileWriter(logProbFileName), append);
+      PrintWriter logProbWriter = new PrintWriter(new FileWriter(logProbFileName, append));
 
       // count matrices have been populated, every token has been
       // assigned to a single topic, so Gibbs sampling can start
