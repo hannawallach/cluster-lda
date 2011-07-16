@@ -26,15 +26,17 @@ public class LDAExperiment {
     int printInterval = Integer.parseInt(args[index++]); // # iterations between printing out topics
     int saveStateInterval = Integer.parseInt(args[index++]);
 
-    assert args[index++].length() == 2;
+    assert args[index].length() == 2;
     boolean[] sample = new boolean[2]; // whether to sample hyperparameters
 
     for (int i=0; i<2; i++)
-      switch(args[index++].charAt(i)) {
+      switch(args[index].charAt(i)) {
       case '0': sample[i] = false; break;
       case '1': sample[i] = true; break;
       default: System.exit(1);
       }
+
+    index++;
 
     String outputDir = args[index++]; // output directory
 
