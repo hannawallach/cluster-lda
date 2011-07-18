@@ -28,6 +28,7 @@ public class ClusterFeature {
   private Cluster[] clusters; // list of clusters
   private Cluster[] clusterAssignments; // item-cluster mapping
 
+  private TIntHashSet activeClusters; // list of active cluster IDs
   private Stack<Cluster> emptyClusterStack; // stack of empty clusters
 
   private LogRandoms rng;
@@ -57,10 +58,9 @@ public class ClusterFeature {
   // sample cluster assignments
 
   // theta is the concentration parameter for the DP prior over
-  // clusters, initClusters is the number of clusters to use,
-  // itemFile indicates which features have been used in each document
+  // clusters, initClusters is the number of clusters to use
 
-  public void initialize(double theta, String priorType, int maxClusters, double[] alpha, int F, String itemFile, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
+  public void initialize(double theta, String priorType, int maxClusters, double[] alpha, int F, TIntIntHashMap[] counts, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
 
     this.theta = theta;
 
@@ -73,19 +73,6 @@ public class ClusterFeature {
     this.D = docs.size();
 
     this.F = F;
-
-    TIntIntHashMap[] z = new TIntIntHashMap[docs.size()];
-
-    int maxFeature = ItemLoader.load(itemFile, z);
-
-    // have to initialize set of items...
-
-    this.items = new Item[D];
-
-    for (int d=0; d<D; d++)
-      items[d] = new Item(z[d], d);
-
-    z = null; // finished using z
 
     // there can never be more than D clusters (where D is the number
     // of items), therefore our list of all possible clusters should
@@ -109,11 +96,18 @@ public class ClusterFeature {
 
     clusterAssignments = new Cluster[D];
 
-    // randomly assign items to clusters and initialize feature counts
+    activeClusters = new TIntHashSet();
+
+    // have to initialize set of items, randomly assign items to
+    // clusters and initialize feature counts
+
+    this.items = new Item[D];
 
     for (int d=0; d<D; d++) {
 
-      Item item = items[d];
+      Item item = new Item(counts[d], d);
+
+      items[d] = item;
 
       // get the old cluster ID for this document
 
@@ -126,6 +120,10 @@ public class ClusterFeature {
       // add the item to that cluster
 
       cluster.add(item);
+
+      // add the cluster to list of active clusters
+
+      activeClusters.add(c);
 
       // set the dth entry in the clusterAssignments array to the
       // Cluster object for the dth item)
@@ -168,6 +166,14 @@ public class ClusterFeature {
 
     assert initialized == true;
 
+    /*
+    emptyClusterStack = new Stack<Cluster>();
+
+    for (Cluster cluster: clusters)
+      if (cluster.isEmpty())
+        emptyClusterStack.push(cluster);
+    */
+
     for (int s=1; s<=S; s++) {
 
       sampleClusters(true);
@@ -199,6 +205,13 @@ public class ClusterFeature {
 
   public void sampleClusters(boolean initialized) {
 
+    // make a list of all the clusters used so far
+
+    TIntHashSet prevCached = null;
+
+    if (priorType.equals("UP"))
+      prevCached = new TIntHashSet();
+
     for (int d=0; d<D; d++) {
 
       Item item = items[d]; assert item.ID == d;
@@ -219,8 +232,10 @@ public class ClusterFeature {
 
         oldCluster.remove(item);
 
-        if (oldCluster.isEmpty())
+        if (oldCluster.isEmpty()) {
+          activeClusters.remove(oldID);
           emptyClusterStack.push(oldCluster);
+        }
 
         // remove item from feature counts
 
@@ -230,18 +245,63 @@ public class ClusterFeature {
       else
         assert docs.getDocument(d).getCluster() == -1;
 
+      assert !emptyClusterStack.empty();
+
+      // pop a lucky empty cluster from the stack
+
+      Cluster empty = emptyClusterStack.pop();
+
+      activeClusters.add(empty.ID);
+
+      int[] idx = activeClusters.toArray();
+      Arrays.sort(idx);
+
       // loop over all possible clusters
 
-      double[] logDist = new double[C];
+      double[] logDist = new double[idx.length];
 
-      for (int c=0; c<C; c++) {
+      for (int i=0; i<idx.length; i++) {
+
+        int c = idx[i];
 
         Cluster cluster = clusters[c];
 
         // if this cluster is empty, ignore it
 
         if (cluster.isEmpty()) {
-          logDist[c] = Double.NEGATIVE_INFINITY;
+
+          assert cluster == empty;
+
+          logDist[i] = empty.getLogProb(item);
+
+          if (priorType.equals("UP")) {
+
+            TIntHashSet prev = (TIntHashSet) prevCached.clone();
+
+            double logPrior = Math.log(theta) - Math.log(prev.size() + theta);
+
+            prev.add(empty.ID);
+
+            // the 1st term is now computed... now compute the 2nd
+            // term -- this involves looking at all future items
+
+            for (int dp=(d+1); dp<D; dp++) {
+
+              int dpID = clusterAssignments[dp].ID;
+
+              if (prev.contains(dpID))
+                logPrior += Math.log(1.0) - Math.log(prev.size() + theta);
+              else {
+                logPrior += Math.log(theta) - Math.log(prev.size() + theta);
+                prev.add(dpID);
+              }
+            }
+
+            logDist[i] += logPrior;
+          }
+          else
+            logDist[i] += Math.log(theta);
+
           continue;
         }
 
@@ -250,7 +310,7 @@ public class ClusterFeature {
         // (theta + items.size() - 1), however this is a constant from
         // the perspective of the dist. we're sampling from
 
-        logDist[c] = cluster.getLogProb(item);
+        logDist[i] = cluster.getLogProb(item);
 
         if (priorType.equals("UP")) {
 
@@ -264,20 +324,12 @@ public class ClusterFeature {
           // and see how many unique clusters there are for those
           // items... we can do this by...
 
-          TIntArrayList prevIDs = new TIntArrayList();
-
-          for (int dp=0; dp<d; dp++) {
-
-            int dpID = clusterAssignments[dp].ID;
-
-            if (!prevIDs.contains(dpID))
-              prevIDs.add(dpID);
-          }
+          TIntHashSet prev = (TIntHashSet) prevCached.clone();
 
           // the probability of adding item d to cluster c at this
           // point is therefore 1.0 / (# prev. clusters + theta)
 
-          double logPrior = Math.log(1.0) - Math.log(prevIDs.size() + theta);
+          double logPrior = Math.log(1.0) - Math.log(prev.size() + theta);
 
           // but we have to compute the impact on future clusters
 
@@ -285,71 +337,23 @@ public class ClusterFeature {
 
             int dpID = clusterAssignments[dp].ID;
 
-            if (prevIDs.contains(dpID))
-              logPrior += Math.log(1.0) - Math.log(prevIDs.size() + theta);
+            if (prev.contains(dpID))
+              logPrior += Math.log(1.0) - Math.log(prev.size() + theta);
             else {
-              logPrior += Math.log(theta) - Math.log(prevIDs.size() + theta);
-              prevIDs.add(dpID);
+              logPrior += Math.log(theta) - Math.log(prev.size() + theta);
+              prev.add(dpID);
             }
           }
 
-          logDist[c] += logPrior;
+          logDist[i] += logPrior;
         }
         else
-          logDist[c] += Math.log(cluster.clusterSize);
+          logDist[i] += Math.log(cluster.clusterSize);
       }
-
-      // compute probability of picking a new cluster
-
-      assert !emptyClusterStack.empty();
-
-      // pop a lucky empty cluster from the stack
-
-      Cluster empty = emptyClusterStack.pop();
-
-      logDist[empty.ID] = empty.getLogProb(item);
-
-      if (priorType.equals("UP")) {
-
-        // make a list of all the clusters used so far
-
-        TIntArrayList prevIDs = new TIntArrayList();
-
-        for (int dp=0; dp<d; dp++) {
-
-          int dpID = clusterAssignments[dp].ID;
-
-          if (!prevIDs.contains(dpID))
-            prevIDs.add(dpID);
-        }
-
-        double logPrior = Math.log(theta) - Math.log(prevIDs.size() + theta);
-
-        prevIDs.add(empty.ID);
-
-        // the first term is now computed... now to compute the second
-        // term -- this involves looking at all future items
-
-        for (int dp=(d+1); dp<D; dp++) {
-
-          int dpID = clusterAssignments[dp].ID;
-
-          if (prevIDs.contains(dpID))
-            logPrior += Math.log(1.0) - Math.log(prevIDs.size() + theta);
-          else {
-            logPrior += Math.log(theta) - Math.log(prevIDs.size() + theta);
-            prevIDs.add(dpID);
-          }
-        }
-
-        logDist[empty.ID] += logPrior;
-      }
-      else
-        logDist[empty.ID] += Math.log(theta);
 
       // draw a new cluster for this item
 
-      int c = rng.nextDiscreteLogDist(logDist);
+      int c = idx[rng.nextDiscreteLogDist(logDist)];
 
       Cluster newCluster = clusters[c];
 
@@ -358,6 +362,7 @@ public class ClusterFeature {
 
       if (newCluster != empty) {
 
+        activeClusters.remove(empty.ID);
         emptyClusterStack.push(empty);
         assert empty.ID != c;
       }
@@ -375,6 +380,11 @@ public class ClusterFeature {
       // for this item points to the newly selected cluster
 
       clusterAssignments[d] = newCluster;
+
+      // update the list of clusters used up to this point
+
+      if (priorType.equals("UP"))
+        prevCached.add(c);
     }
   }
 
@@ -509,6 +519,7 @@ public class ClusterFeature {
         clusterCountsNorm++;
     }
 
+    /*
     if (priorType.equals("UP")) {
 
       int numActive = 0;
@@ -525,6 +536,7 @@ public class ClusterFeature {
     else
       for (int c=0; c<C; c++)
         assert clusterCounts[c] == clusters[c].clusterSize;
+    */
 
     return logProb;
   }

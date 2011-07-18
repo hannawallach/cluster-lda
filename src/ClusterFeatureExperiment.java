@@ -80,7 +80,11 @@ public class ClusterFeatureExperiment {
     double[] alpha = new double[3];
     Arrays.fill(alpha, 0.1 * F);
 
-    ct.initialize(theta, priorType, max, alpha, F, featureUsageFileName, null, useDocCounts, docs); // initialize the clustering model
+    TIntIntHashMap[] counts = new TIntIntHashMap[docs.size()];
+
+    StateLoader.load(featureUsageFileName, null, counts);
+
+    ct.initialize(theta, priorType, max, alpha, F, counts, null, useDocCounts, docs); // initialize the clustering model
 
     for (int s=1; s<=numIterations; s++) {
 

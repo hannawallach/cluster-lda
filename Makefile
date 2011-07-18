@@ -54,7 +54,7 @@ $(RESULTS_DIR)/lda/%/T$(T)-S$(S)-SAMPLE$(SAMPLE)-ID$(ID):
 	$@ \
 	> $@/stdout.txt
 
-$(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+$(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(SG) / 10`; \
 	java $(JAVA_FLAGS) \
@@ -64,6 +64,57 @@ $(RESULTS_DIR)/cluster/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOC
 	$(C) \
 	$(SG) \
 	$(SC) \
+	$$I \
+	$(THETA) \
+	$(SAMPLE) \
+	$(DOCCOUNTS) \
+	$(PRIOR) \
+	$@ \
+	> $@/stdout.txt
+
+# T should be the number of topics
+
+# STATE_FILE should be a gzipped state file in MALLET format
+
+$(RESULTS_DIR)/cluster_topic/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+	mkdir -p $@; \
+	I=`expr $(SG) / 10`; \
+	java $(JAVA_FLAGS) \
+	-classpath $(CP) \
+        edu.umass.cs.wallach.cluster.ClusterFeatureExperiment \
+	$(DATA_DIR)/patents/$*.dat \
+	$(STATE_FILE) \
+	$(T) \
+	$(C) \
+	$(SG) \
+	$(SC) \
+	$$I \
+	$(THETA) \
+	$(SAMPLE) \
+	$(DOCCOUNTS) \
+	$(PRIOR) \
+	$@ \
+	> $@/stdout.txt
+
+# T should be the number of topics
+
+# STATE_FILE should be a gzipped state file in MALLET format
+
+# ST should be the number of topic iterations
+
+$(RESULTS_DIR)/cluster_lda/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+	mkdir -p $@; \
+	I=`expr $(SG) / 10`; \
+	java $(JAVA_FLAGS) \
+	-classpath $(CP) \
+        edu.umass.cs.wallach.cluster.ClusterLDAExperiment \
+	$(DATA_DIR)/patents/$*.dat \
+	$(STATE_FILE) \
+	$(T) \
+	$(C) \
+	$(SG) \
+	$(SC) \
+	$(ST) \
 	$$I \
 	$(THETA) \
 	$(SAMPLE) \

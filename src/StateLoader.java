@@ -6,16 +6,23 @@ import java.util.zip.*;
 
 import gnu.trove.*;
 
-public class ItemLoader {
+public class StateLoader {
 
-  public static int load(String fileName, TIntIntHashMap[] z) {
+  public static int load(String fileName, int[][] z, TIntIntHashMap[] counts) {
 
     int currentDoc = -1;
     int currentPosition = 0;
     int maxFeature = 0;
 
-    for (int d=0; d<z.length; d++)
-      z[d] = null;
+    assert !((counts == null) && (z == null));
+
+    if (z != null)
+      for (int d=0; d<z.length; d++)
+        Arrays.fill(z[d], -1);
+
+    if (counts != null)
+      for (int d=0; d<counts.length; d++)
+        counts[d] = null;
 
     try {
 
@@ -44,15 +51,22 @@ public class ItemLoader {
           currentDoc = docIndex;
           currentPosition = 0;
 
-          z[currentDoc] = new TIntIntHashMap();
+          if (counts != null)
+            counts[currentDoc] = new TIntIntHashMap();
         }
 
-        TIntIntHashMap item = z[currentDoc];
+        if (z != null)
+          z[currentDoc][currentPosition] = feature;
 
-        if (item.containsKey(feature))
-          item.put(feature, item.get(feature) + 1);
-        else
-          item.put(feature, 1);
+        if (counts != null) {
+
+          TIntIntHashMap item = counts[currentDoc];
+
+          if (item.containsKey(feature))
+            item.put(feature, item.get(feature) + 1);
+          else
+            item.put(feature, 1);
+        }
 
         currentPosition++;
       }
@@ -63,11 +77,24 @@ public class ItemLoader {
       System.out.println(e);
     }
 
-    for (int d=0; d<z.length; d++) {
-      if (z[d] == null)
-        System.out.println("Error loading item " + d);
+    if (z != null) {
+      for (int d=0; d<z.length; d++) {
+        for (int i=0; i<z[d].length; i++) {
+          if (z[d][i] == -1)
+            System.out.println("Error loading item " + d);
 
-      assert z[d] != null;
+          assert z[d][i] != -1;
+        }
+      }
+    }
+
+    if (counts != null) {
+      for (int d=0; d<counts.length; d++) {
+        if (counts[d] == null)
+          System.out.println("Error loading item " + d);
+
+        assert counts[d] != null;
+      }
     }
 
     return maxFeature + 1;
