@@ -7,7 +7,8 @@ SCRIPTS_DIR = scripts
 
 MAX_HEAP = 1500m
 
-JAVA_FLAGS = -server -enableassertions -Xmx$(MAX_HEAP) -XX:MaxPermSize=500m
+JAVA_FLAGS = -server -Xmx$(MAX_HEAP) -XX:MaxPermSize=500m
+#JAVA_FLAGS = -server -enableassertions -Xmx$(MAX_HEAP) -XX:MaxPermSize=500m
 
 CP = $(BUILD_DIR):$(LIBS_DIR)/mallet.jar:$(LIBS_DIR)/mallet-deps.jar
 
