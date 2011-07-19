@@ -16,7 +16,7 @@ public class ClusterFeature {
 
   private int F, D, C; // constants
 
-  // default concentration parameter for the DP prior over clusters
+  // default concentration parameter for the prior over clusters
 
   private double theta;
 
@@ -57,8 +57,8 @@ public class ClusterFeature {
 
   // sample cluster assignments
 
-  // theta is the concentration parameter for the DP prior over
-  // clusters, initClusters is the number of clusters to use
+  // theta is the concentration parameter for the prior over clusters,
+  // initClusters is the number of clusters to use
 
   public void initialize(double theta, String priorType, int maxClusters, double[] alpha, int F, TIntIntHashMap[] counts, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
 
@@ -205,7 +205,7 @@ public class ClusterFeature {
 
   public void sampleClusters(boolean initialized) {
 
-    // make a list of all the clusters used so far
+    // keep a list of all the clusters used so far
 
     TIntHashSet prevCached = null;
 
@@ -266,7 +266,7 @@ public class ClusterFeature {
 
         Cluster cluster = clusters[c];
 
-        // if this cluster is empty, ignore it
+        // if this cluster is empty, handle it appropriately
 
         if (cluster.isEmpty()) {
 
