@@ -494,7 +494,8 @@ public class ClusterFeature {
     double logNewTheta = Math.log(newTheta);
 
     int[] clusterCounts = new int[C];
-    int clusterCountsNorm = 0;
+
+    int numActiveClusters = 0;
 
     for (int d=0; d<D; d++) {
 
@@ -502,40 +503,32 @@ public class ClusterFeature {
 
       int nc = clusterCounts[c];
 
-      if (priorType.equals("UP"))
+      if (priorType.equals("UP")) {
+        logProb -= Math.log(newTheta + numActiveClusters);
         logProb += (nc == 0) ? logNewTheta : Math.log(1.0);
-      else
+      }
+      else {
+        logProb -= Math.log(newTheta + d);
         logProb += (nc == 0) ? logNewTheta : Math.log(nc);
-
-      logProb -= Math.log(newTheta + clusterCountsNorm);
+      }
 
       clusterCounts[c]++;
 
-      if (priorType.equals("UP")) {
-        if (nc == 0)
-          clusterCountsNorm++;
-      }
-      else
-        clusterCountsNorm++;
+      if (nc == 0)
+        numActiveClusters++;
     }
 
     /*
-    if (priorType.equals("UP")) {
+    int num = 0;
 
-      int numActive = 0;
+    for (int c=0; c<C; c++) {
+      assert clusterCounts[c] == clusters[c].clusterSize;
 
-      for (int c=0; c<C; c++) {
-        assert clusterCounts[c] == clusters[c].clusterSize;
-
-        if (clusterCounts[c] != 0)
-          numActive++;
-      }
-
-      assert clusterCountsNorm == numActive;
+      if (clusterCounts[c] != 0)
+        num++;
     }
-    else
-      for (int c=0; c<C; c++)
-        assert clusterCounts[c] == clusters[c].clusterSize;
+
+    assert numActiveClusters == num;
     */
 
     return logProb;
