@@ -195,30 +195,52 @@ public class LDA {
           }
         }
 
-        if (saveStateInterval != 0) {
-          if (s % saveStateInterval == 0) {
+        if ((saveStateInterval != 0) && (s % saveStateInterval == 0)) {
+          if (stateFileName != null)
             docs.printFeatures(z, stateFileName + "." + (itnOffset + s));
+          if (alphaFileName != null)
             topicScore.printAlpha(alphaFileName + "." + (itnOffset + s));
+          if (betaFileName != null)
             wordScore.printBeta(betaFileName + "." + (itnOffset + s));
-          }
         }
       }
 
       Timer.printTimingInfo(start, System.currentTimeMillis());
 
       if (saveStateInterval == 0) {
-        docs.printFeatures(z, stateFileName);
-        topicScore.printAlpha(alphaFileName);
-        wordScore.printBeta(betaFileName);
+        if (stateFileName != null)
+          docs.printFeatures(z, stateFileName);
+        if (alphaFileName != null)
+          topicScore.printAlpha(alphaFileName);
+        if (betaFileName != null)
+          wordScore.printBeta(betaFileName);
       }
 
-      topicScore.print(docs, documentTopicsFileName);
-      wordScore.print(wordDict, topicWordsFileName);
+      if (documentTopicsFileName != null)
+        topicScore.print(docs, documentTopicsFileName);
+      if (topicWordsFileName != null)
+        wordScore.print(wordDict, topicWordsFileName);
 
-      wordScore.print(wordDict, 0.0, 10, true, topicSummaryFileName);
+      if (topicSummaryFileName != null)
+        wordScore.print(wordDict, 0.0, 10, true, topicSummaryFileName);
     }
     catch (IOException e) {
       System.out.println(e);
     }
+  }
+
+  public double[] getAlpha() {
+
+    return topicScore.getAlpha();
+  }
+
+  public double[] getBeta() {
+
+    return wordScore.getBeta();
+  }
+
+  public int[][] getTopics() {
+
+    return z;
   }
 }
