@@ -40,9 +40,9 @@ public class ClusterFeature {
     return clusterAssignments;
   }
 
-  public double getConcentrationParameter() {
+  public double[] getParam() {
 
-    return theta;
+    return new double[] { theta };
   }
 
   public int getNumClusters() {
@@ -60,9 +60,11 @@ public class ClusterFeature {
   // theta is the concentration parameter for the prior over clusters,
   // initClusters is the number of clusters to use
 
-  public void initialize(double theta, String priorType, int maxClusters, double[] alpha, int F, TIntIntHashMap[] counts, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
+  public void initialize(double[] param, String priorType, int maxClusters, double[] alpha, int F, TIntIntHashMap[] counts, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
 
-    this.theta = theta;
+    assert param.length == 1;
+
+    this.theta = param[0];
 
     this.priorType = priorType;
 

@@ -84,7 +84,9 @@ public class ClusterFeatureExperiment {
 
     StateLoader.load(featureUsageFileName, null, counts);
 
-    ct.initialize(theta, priorType, max, alpha, F, counts, null, useDocCounts, docs); // initialize the clustering model
+    double[] param = new double[] { theta };
+
+    ct.initialize(param, priorType, max, alpha, F, counts, null, useDocCounts, docs); // initialize the clustering model
 
     for (int s=1; s<=numIterations; s++) {
 
@@ -109,7 +111,7 @@ public class ClusterFeatureExperiment {
 
       // extract new concentration parameter value
 
-      theta = ct.getConcentrationParameter();
+      param = ct.getParam();
 
       // create InstanceList with labels that are cluster assignments
 

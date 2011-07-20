@@ -97,13 +97,15 @@ public class ClusterLDAExperiment extends ClusterFeatureExperiment {
 
     StateLoader.load(featureUsageFileName, z, counts);
 
+    double[] param = new double[] { theta };
+
     long start = System.currentTimeMillis();
 
     for (int s=1; s<=numIterations; s++) {
 
       String itn = Integer.toString(s);
 
-      ct.initialize(theta, priorType, max, alpha, F, counts, null, useDocCounts, docs); // initialize the clustering model
+      ct.initialize(param, priorType, max, alpha, F, counts, null, useDocCounts, docs); // initialize the clustering model
 
       // cluster documents and output final clustering
 
@@ -124,7 +126,7 @@ public class ClusterLDAExperiment extends ClusterFeatureExperiment {
 
       // extract new concentration parameter value
 
-      theta = ct.getConcentrationParameter();
+      param = ct.getParam();
 
       // create InstanceList with labels that are cluster assignments
 
