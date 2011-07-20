@@ -139,6 +139,12 @@ public class ClusterLDAExperiment extends ClusterFeatureExperiment {
 
       lda.estimate(docs, null, z, (s-1) * numTopicIterations, F, max, alpha, beta, numTopicIterations, 1, 0, new boolean[] { false, true }, null, null, null, null, null, null, null, outputDir + "/log_prob_topics_and_words.txt");
 
+      // extract new topic assignments and parameter values
+
+      z = lda.getTopics();
+      alpha = lda.getAlpha();
+      beta = lda.getBeta();
+
       aggregate(z, counts);
     }
 
