@@ -108,11 +108,11 @@ public class ClusterLDA {
 
   // estimate topics
 
-  public void estimate(Corpus docs, TIntIntHashMap unseenCounts, int[][] z, int itnOffset, int T, int C, double[] alpha, double[] beta, int numItns, int printInterval, int saveStateInterval, boolean[] sample, String clusterTopicsFileName, String documentTopicsFileName, String topicWordsFileName, String topicSummaryFileName, String stateFileName, String alphaFileName, String betaFileName, String logProbFileName) {
+  public void estimate(Corpus docs, TIntIntHashMap unseenCounts, int[][] zInit, int itnOffset, int T, int C, double[] alpha, double[] beta, int numItns, int printInterval, int saveStateInterval, boolean[] sample, String clusterTopicsFileName, String documentTopicsFileName, String topicWordsFileName, String topicSummaryFileName, String stateFileName, String alphaFileName, String betaFileName, String logProbFileName) {
 
     boolean append = false;
 
-    if (z == null)
+    if (zInit == null)
       assert itnOffset == 0;
     else {
       assert itnOffset >= 0;
@@ -138,14 +138,14 @@ public class ClusterLDA {
     wordScore = new WordScore(W, T, beta, unseenCounts);
     topicScore = new ClusterTopicScore(T, D, C, alpha, "minimal");
 
-    if (z == null) {
+    if (zInit == null) {
 
-      this.z = new int[D][];
+      z = new int[D][];
       sampleTopics(docs, true); // initialize topic assignments
     }
     else {
 
-      this.z = z;
+      z = zInit;
 
       for (int d=0; d<D; d++) {
 
@@ -236,5 +236,20 @@ public class ClusterLDA {
     catch (IOException e) {
       System.out.println(e);
     }
+  }
+
+  public double[] getAlpha() {
+
+    return topicScore.getAlpha();
+  }
+
+  public double[] getBeta() {
+
+    return wordScore.getBeta();
+  }
+
+  public int[][] getTopics() {
+
+    return z;
   }
 }
