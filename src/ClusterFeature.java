@@ -16,7 +16,7 @@ public class ClusterFeature {
 
   private int F, D, C; // constants
 
-  // default concentration parameter for the prior over clusters
+  // default parameter(s) for the prior over clusters
 
   private double[] param;
 
@@ -59,11 +59,14 @@ public class ClusterFeature {
 
   public void initialize(double[] param, String priorType, int maxClusters, double[] alpha, int F, TIntIntHashMap[] counts, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
 
-    assert param.length == 1;
-
     this.param = param;
 
     this.priorType = priorType;
+
+    if (priorType.equals("PYP"))
+      assert param.length == 2;
+    else
+      assert param.length == 1;
 
     // keep track of documents
 
@@ -204,7 +207,10 @@ public class ClusterFeature {
 
   public void sampleClusters(boolean initialized) {
 
+    // extract hyperparameters
+
     double theta = param[0];
+    double eps = (param.length == 2) ? param[1] : 0.0;
 
     // keep a list of all the clusters used so far
 
@@ -300,6 +306,8 @@ public class ClusterFeature {
 
             logDist[i] += logPrior;
           }
+          else if (priorType.equals("PYP"))
+            logDist[i] += Math.log(theta + eps * (activeClusters.size() - 1));
           else
             logDist[i] += Math.log(theta);
 
@@ -348,6 +356,8 @@ public class ClusterFeature {
 
           logDist[i] += logPrior;
         }
+        else if (priorType.equals("PYP"))
+          logDist[i] += Math.log(cluster.clusterSize - eps);
         else
           logDist[i] += Math.log(cluster.clusterSize);
       }
@@ -418,6 +428,10 @@ public class ClusterFeature {
       PrintWriter pw = new PrintWriter(new FileWriter(fileName, true));
 
       pw.print(param[0]);
+
+      if (param.length == 2)
+        pw.print(" " + param[1]);
+
       pw.println();
 
       pw.close();
@@ -490,9 +504,15 @@ public class ClusterFeature {
 
     param[0] = Math.exp(newRawParam[0]);
 
+    if (param.length == 2) {
+      param[1] = Math.exp(newRawParam[1]);
+      param[1] /= 1.0 + param[1];
+    }
+
     double logProb = getLogPrior();
 
-    param[0] = oldParam[0];
+    for (int i=0; i<param.length; i++)
+      param[i] = oldParam[i];
 
     return logProb;
   }
@@ -500,6 +520,7 @@ public class ClusterFeature {
   public double getLogPrior() {
 
     double theta = param[0];
+    double eps = (param.length == 2) ? param[1] : 0.0;
 
     double logProb = 0.0;
 
@@ -518,6 +539,10 @@ public class ClusterFeature {
       if (priorType.equals("UP")) {
         logProb -= Math.log(theta + numActiveClusters);
         logProb += (nc == 0) ? logTheta : Math.log(1.0);
+      }
+      else if (priorType.equals("PYP")) {
+        logProb -= Math.log(theta + d);
+        logProb += (nc == 0) ? Math.log(theta + eps * numActiveClusters) : Math.log(nc - eps);
       }
       else {
         logProb -= Math.log(theta + d);
@@ -555,9 +580,15 @@ public class ClusterFeature {
 
     rawParam[0] = Math.log(param[0]);
 
+    if (I == 2)
+      rawParam[1] = Math.log(param[1] / (1.0 - param[1]));
+
     for (int i=0; i<I; i++) {
       rawParamSum += rawParam[i];
     }
+
+    if (I == 2)
+      rawParamSum -= 2.0 * Math.log(1.0 + Math.exp(rawParam[1]));
 
     double[] l = new double[I];
     double[] r = new double[I];
@@ -584,6 +615,9 @@ public class ClusterFeature {
           rawParamNewSum += rawParamNew[i];
         }
 
+        if (I == 2)
+          rawParamNewSum -= 2.0 * Math.log(1.0 + Math.exp(rawParamNew[1]));
+
         if (getLogPrior(rawParamNew) + rawParamNewSum > lpNew)
           break;
         else
@@ -599,6 +633,13 @@ public class ClusterFeature {
     }
 
     param[0] = Math.exp(rawParam[0]);
+
+    if (I == 2) {
+      param[1] = Math.exp(rawParam[1]);
+      param[1] /= 1.0 + param[1];
+
+      assert ((param[1] >= 0.0) && (param[1] <= 1.0));
+    }
   }
 
   class Cluster {

@@ -55,9 +55,7 @@ public class ClusterFeatureExperiment {
 
     boolean useDocCounts = Boolean.valueOf(args[index++]);
 
-    String priorType = args[index++]; // type of prior
-
-    assert priorType.equals("UP") || priorType.equals("DP");
+    String priorType = args[index++]; // type of prior (UP, DP or PYP)
 
     String outputDir = args[index++]; // output directory
 
@@ -84,7 +82,12 @@ public class ClusterFeatureExperiment {
 
     StateLoader.load(featureUsageFileName, null, counts);
 
-    double[] param = new double[] { theta };
+    double[] param;
+
+    if (priorType.equals("PYP"))
+      param = new double[] { theta, 0.01 };
+    else
+      param = new double[] { theta };
 
     ct.initialize(param, priorType, max, alpha, F, counts, null, useDocCounts, docs); // initialize the clustering model
 
@@ -96,7 +99,7 @@ public class ClusterFeatureExperiment {
 
       if (s % saveStateInterval == 0) {
 
-        ct.estimate(sampleConcentrationParameter, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/theta.txt", outputDir + "/log_prob.txt");
+        ct.estimate(sampleConcentrationParameter, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/param.txt", outputDir + "/log_prob.txt");
 
         alpha = ct.sampleAlpha(5, outputDir + "/alpha.txt." + itn);
 
@@ -109,7 +112,7 @@ public class ClusterFeatureExperiment {
         alpha = ct.sampleAlpha(5);
       }
 
-      // extract new concentration parameter value
+      // extract new parameter value(s)
 
       param = ct.getParam();
 
