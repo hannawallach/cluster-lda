@@ -175,7 +175,11 @@ public class ClusterTopicScore {
 
     // only need to lock the non-document-specific counts
 
-    topicClusterCountsTrain = topicClusterCounts.clone();
+    topicClusterCountsTrain = new int[T][];
+
+    for (int j=0; j<T; j++)
+      topicClusterCountsTrain[j] = topicClusterCounts[j].clone();
+
     topicClusterCountsNormTrain = topicClusterCountsNorm.clone();
 
     topicCountsTrain = topicCounts.clone();
@@ -193,7 +197,9 @@ public class ClusterTopicScore {
 
     if (resetToTrain) {
 
-      topicClusterCounts = topicClusterCountsTrain.clone();
+      for (int j=0; j<T; j++)
+        topicClusterCounts[j] = topicClusterCountsTrain[j].clone();
+
       topicClusterCountsNorm = topicClusterCountsNormTrain.clone();
 
       topicCounts = topicCountsTrain.clone();
@@ -273,7 +279,8 @@ public class ClusterTopicScore {
 
     double logProb = logProb(docs, z);
 
-    alpha = oldAlpha.clone();
+    for (int i=0; i<alpha.length; i++)
+      alpha[i] = oldAlpha[i];
 
     return logProb;
   }
