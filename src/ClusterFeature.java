@@ -18,7 +18,7 @@ public class ClusterFeature {
 
   // default concentration parameter for the prior over clusters
 
-  private double theta;
+  private double[] param;
 
   private String priorType;
 
@@ -42,7 +42,7 @@ public class ClusterFeature {
 
   public double[] getParam() {
 
-    return new double[] { theta };
+    return param;
   }
 
   public int getNumClusters() {
@@ -57,14 +57,11 @@ public class ClusterFeature {
 
   // sample cluster assignments
 
-  // theta is the concentration parameter for the prior over clusters,
-  // initClusters is the number of clusters to use
-
   public void initialize(double[] param, String priorType, int maxClusters, double[] alpha, int F, TIntIntHashMap[] counts, TIntIntHashMap unseenCounts, boolean useDocCounts, Corpus docs) {
 
     assert param.length == 1;
 
-    this.theta = param[0];
+    this.param = param;
 
     this.priorType = priorType;
 
@@ -153,18 +150,18 @@ public class ClusterFeature {
     initialized = true;
   }
 
-  public void estimate(boolean sampleTheta, int S, String clustersFileName, String numClustersFileName, String thetaFileName, String logProbFileName) {
+  public void estimate(boolean sampleParam, int S, String clustersFileName, String numClustersFileName, String paramFileName, String logProbFileName) {
 
-    estimate(sampleTheta, S);
+    estimate(sampleParam, S);
 
     printClusterAssignments(clustersFileName);
     printNumClusters(numClustersFileName);
-    printTheta(thetaFileName);
+    printParam(paramFileName);
 
     printLogProb(logProbFileName);
   }
 
-  public void estimate(boolean sampleTheta, int S) {
+  public void estimate(boolean sampleParam, int S) {
 
     assert initialized == true;
 
@@ -182,8 +179,8 @@ public class ClusterFeature {
 
       // sample concentration parameter based on previous clustering
 
-      if (sampleTheta)
-        sampleTheta(5, 1.0);
+      if (sampleParam)
+        sampleParam(5, 1.0);
     }
   }
 
@@ -206,6 +203,8 @@ public class ClusterFeature {
   // sample cluster assignments
 
   public void sampleClusters(boolean initialized) {
+
+    double theta = param[0];
 
     // keep a list of all the clusters used so far
 
@@ -412,13 +411,14 @@ public class ClusterFeature {
     }
   }
 
-  public void printTheta(String fileName) {
+  public void printParam(String fileName) {
 
     try {
 
       PrintWriter pw = new PrintWriter(new FileWriter(fileName, true));
 
-      pw.println(theta);
+      pw.print(param[0]);
+      pw.println();
 
       pw.close();
     }
@@ -484,16 +484,26 @@ public class ClusterFeature {
     return featureScore.logProb(items, clusterAssignments);
   }
 
-  public double getLogPrior() {
+  public double getLogPrior(double[] newRawParam) {
 
-    return getLogPrior(theta);
+    double[] oldParam = param.clone();
+
+    param[0] = Math.exp(newRawParam[0]);
+
+    double logProb = getLogPrior();
+
+    param[0] = oldParam[0];
+
+    return logProb;
   }
 
-  public double getLogPrior(double newTheta) {
+  public double getLogPrior() {
+
+    double theta = param[0];
 
     double logProb = 0.0;
 
-    double logNewTheta = Math.log(newTheta);
+    double logTheta = Math.log(theta);
 
     int[] clusterCounts = new int[C];
 
@@ -506,12 +516,12 @@ public class ClusterFeature {
       int nc = clusterCounts[c];
 
       if (priorType.equals("UP")) {
-        logProb -= Math.log(newTheta + numActiveClusters);
-        logProb += (nc == 0) ? logNewTheta : Math.log(1.0);
+        logProb -= Math.log(theta + numActiveClusters);
+        logProb += (nc == 0) ? logTheta : Math.log(1.0);
       }
       else {
-        logProb -= Math.log(newTheta + d);
-        logProb += (nc == 0) ? logNewTheta : Math.log(nc);
+        logProb -= Math.log(theta + d);
+        logProb += (nc == 0) ? logTheta : Math.log(nc);
       }
 
       clusterCounts[c]++;
@@ -536,40 +546,59 @@ public class ClusterFeature {
     return logProb;
   }
 
-  public void sampleTheta(int numSamples, double stepSize) {
+  public void sampleParam(int numSamples, double stepSize) {
 
-    double rawParam = Math.log(theta);
+    int I = param.length;
 
-    double l = 0.0;
-    double r = 0.0;
+    double[] rawParam = new double[I];
+    double rawParamSum = 0.0;
+
+    rawParam[0] = Math.log(param[0]);
+
+    for (int i=0; i<I; i++) {
+      rawParamSum += rawParam[i];
+    }
+
+    double[] l = new double[I];
+    double[] r = new double[I];
 
     for (int s=0; s<numSamples; s++) {
 
-      double lp = getLogPrior(Math.exp(rawParam)) + rawParam;
+      double lp = getLogPrior(rawParam) + rawParamSum;
       double lpNew = Math.log(rng.nextUniform()) + lp;
 
-      l = rawParam - rng.nextUniform() * stepSize;
-      r = l + stepSize;
+      for (int i=0; i<I; i++) {
+        l[i] = rawParam[i] - rng.nextUniform() * stepSize;
+        r[i] = l[i] + stepSize;
+      }
 
-      double rawParamNew = 0.0;
+      double[] rawParamNew = new double[I];
+      double rawParamNewSum = 0.0;
 
       while (true) {
 
-        rawParamNew = l + rng.nextUniform() * (r - l);
+        rawParamNewSum = 0.0;
 
-        if (getLogPrior(Math.exp(rawParamNew)) + rawParamNew > lpNew)
+        for (int i=0; i<I; i++) {
+          rawParamNew[i] = l[i] + rng.nextUniform() * (r[i] - l[i]);
+          rawParamNewSum += rawParamNew[i];
+        }
+
+        if (getLogPrior(rawParamNew) + rawParamNewSum > lpNew)
           break;
         else
-          if (rawParamNew < rawParam)
-            l = rawParamNew;
-          else
-            r = rawParamNew;
+          for (int i=0; i<I; i++)
+            if (rawParamNew[i] < rawParam[i])
+              l[i] = rawParamNew[i];
+            else
+              r[i] = rawParamNew[i];
       }
 
       rawParam = rawParamNew;
+      rawParamSum = rawParamNewSum;
     }
 
-    theta = Math.exp(rawParam);
+    param[0] = Math.exp(rawParam[0]);
   }
 
   class Cluster {
