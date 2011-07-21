@@ -188,7 +188,8 @@ public class WordScore {
 
     double logProb = logProb(docs, z);
 
-    beta = oldBeta.clone();
+    for (int i=0; i<beta.length; i++)
+      beta[i] = oldBeta[i];
 
     return logProb;
   }

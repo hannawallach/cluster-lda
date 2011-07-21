@@ -210,7 +210,8 @@ public class TopicScore {
 
     double logProb = logProb(docs, z);
 
-    alpha = oldAlpha.clone();
+    for (int i=0; i<alpha.length; i++)
+      alpha[i] = oldAlpha[i];
 
     return logProb;
   }
