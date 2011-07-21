@@ -306,9 +306,7 @@ public class ClusterFeatureScore {
   public void resetCounts() {
 
     if (useDocs) {
-
       featureItemCounts.clear();
-
       Arrays.fill(featureItemCountsNorm, 0);
     }
 
@@ -323,7 +321,6 @@ public class ClusterFeatureScore {
     else {
 
       featureClusterCounts.clear();
-
       Arrays.fill(featureClusterCountsNorm, 0);
 
       Arrays.fill(featureCounts, 0);
@@ -396,7 +393,8 @@ public class ClusterFeatureScore {
 
     double logProb = logProb(items, assignments);
 
-    alpha = oldAlpha.clone();
+    for (int i=0; i<alpha.length; i++)
+      alpha[i] = oldAlpha[i];
 
     return logProb;
   }
