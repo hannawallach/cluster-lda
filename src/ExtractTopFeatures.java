@@ -23,7 +23,7 @@ public class ExtractTopFeatures {
 
     try {
 
-      BufferedReader in = new BufferedReader(new FileReader(featuresFileName));
+      BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(new File(featuresFileName)))));
 
       String line = null;
       String[] fields = null;
@@ -33,8 +33,6 @@ public class ExtractTopFeatures {
       while ((line = in.readLine()) != null) {
 
         fields = line.split("\\s+");
-
-        assert fields[0].equals("Feature");
 
         int t = Integer.parseInt(fields[1].substring(0, fields[1].length()-1));
 
