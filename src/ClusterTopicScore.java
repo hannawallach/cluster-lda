@@ -272,15 +272,15 @@ public class ClusterTopicScore {
 
   private double logProb(Corpus docs, int[][] z, double[] newLogAlpha) {
 
-    double[] oldAlpha = alpha.clone();
+    double[] oldAlpha = new double[alpha.length];
+    System.arraycopy(alpha, 0, oldAlpha, 0, alpha.length);
 
     for (int i=0; i<alpha.length; i++)
       alpha[i] = Math.exp(newLogAlpha[i]);
 
     double logProb = logProb(docs, z);
 
-    for (int i=0; i<alpha.length; i++)
-      alpha[i] = oldAlpha[i];
+    System.arraycopy(oldAlpha, 0, alpha, 0, alpha.length);
 
     return logProb;
   }

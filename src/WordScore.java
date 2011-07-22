@@ -181,15 +181,15 @@ public class WordScore {
 
   private double logProb(Corpus docs, int[][] z, double[] newLogBeta) {
 
-    double[] oldBeta = beta.clone();
+    double[] oldBeta = new double[beta.length];
+    System.arraycopy(beta, 0, oldBeta, 0, beta.length);
 
     for (int i=0; i<beta.length; i++)
       beta[i] = Math.exp(newLogBeta[i]);
 
     double logProb = logProb(docs, z);
 
-    for (int i=0; i<beta.length; i++)
-      beta[i] = oldBeta[i];
+    System.arraycopy(oldBeta, 0, beta, 0, beta.length);
 
     return logProb;
   }
