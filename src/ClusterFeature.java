@@ -500,7 +500,8 @@ public class ClusterFeature {
 
   public double getLogPrior(double[] newRawParam) {
 
-    double[] oldParam = param.clone();
+    double[] oldParam = new double[param.length];
+    System.arraycopy(param, 0, oldParam, 0, param.length);
 
     param[0] = Math.exp(newRawParam[0]);
 
@@ -511,8 +512,7 @@ public class ClusterFeature {
 
     double logProb = getLogPrior();
 
-    for (int i=0; i<param.length; i++)
-      param[i] = oldParam[i];
+    System.arraycopy(oldParam, 0, param, 0, param.length);
 
     return logProb;
   }
