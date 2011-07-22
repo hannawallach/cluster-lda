@@ -11,12 +11,24 @@ public class ExtractTopFeatures {
   private TIntObjectHashMap alphabet;
 
   private int numTopFeatures;
+  private boolean dups;
 
-  public ExtractTopFeatures(int numTopFeatures) {
+  private TIntObjectHashMap clusterFeatures;
+  private TIntObjectHashMap clusterNames;
+
+  private int F, C;
+
+  public ExtractTopFeatures(int numTopFeatures, boolean dups) {
 
     this.numTopFeatures = numTopFeatures;
+    this.dups = dups;
 
     alphabet = new TIntObjectHashMap();
+
+    if (!dups) {
+      clusterFeatures = new TIntObjectHashMap();
+      clusterNames = new TIntObjectHashMap();
+    }
   }
 
   public void processFile(String inputFileName, String featuresFileName) {
@@ -43,6 +55,8 @@ public class ExtractTopFeatures {
         numFeaturesProcessed++;
       }
 
+      F = numFeaturesProcessed;
+
       in.close();
 
       in = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(new File(inputFileName)))));
@@ -65,12 +79,17 @@ public class ExtractTopFeatures {
         if (fields.length <= 1)
           continue;
 
-        System.out.println("\nCluster " + fields[0] + ":\n");
+        if (!dups)
+          clusterNames.put(c, fields[0]);
+        else
+          System.out.println("\nCluster " + fields[0] + ":\n");
 
         int j = -1;
         double p;
 
         numFeaturesProcessed = 0;
+
+        double[] features = new double[F];
 
         for (int i=1; i<fields.length; i++) {
 
@@ -81,25 +100,63 @@ public class ExtractTopFeatures {
             j = Integer.parseInt(fields[i]); // this is a feature
           else {
 
-            System.out.println(alphabet.get(j) + "\n");
+            if (!dups)
+              features[j] = Double.parseDouble(fields[i]);
+            else
+              System.out.println(alphabet.get(j) + "\n");
+
             numFeaturesProcessed++;
           }
         }
 
+        if (!dups)
+          clusterFeatures.put(c, features);
+
         c++;
       }
 
-      System.out.println("Processed " + c + " clusters");
+      if (!dups)
+        C = c;
+      else
+        System.out.println("Processed " + c + " clusters");
     }
     catch (IOException e) {
       System.out.println(e);
+    }
+
+    if (!dups) {
+
+      int[] appearedIn = new int[F];
+      Arrays.fill(appearedIn, 0);
+
+      for (int c=0; c<C; c++) {
+
+        double[] features = (double[]) clusterFeatures.get(c);
+
+        for (int f=0; f<F; f++)
+          if (features[f] > 0.0)
+            appearedIn[f]++;
+      }
+
+      for (int c=0; c<C; c++) {
+
+        double[] features = (double[]) clusterFeatures.get(c);
+
+        System.out.println("\nCluster " + clusterNames.get(c) + ":\n");
+
+        for (int f=0; f<F; f++)
+          if ((features[f] > 0.0) && (appearedIn[f] == 1))
+            System.out.println(alphabet.get(f) + "\n");
+      }
+
+      System.out.println("Processed " + C + " clusters");
     }
   }
 
   public static void main(String[] args) throws java.io.IOException {
 
-    if (args.length != 3) {
-      System.err.println("Usage: ExtractTopFeatures <cluster_features_file> <feature_keys_file> <num_top_features>");
+    if (args.length != 4) {
+      System.err.println("Usage: ExtractTopFeatures <cluster_features_file> <feature_keys_file> <num_top_features> <show_duplicates>");
       System.exit(1);
     }
 
@@ -110,9 +167,11 @@ public class ExtractTopFeatures {
 
     int numTopFeatures = Integer.parseInt(args[index++]);
 
-    assert index == 3;
+    boolean dups = Boolean.valueOf(args[index++]);
 
-    ExtractTopFeatures extract = new ExtractTopFeatures(numTopFeatures);
+    assert index == 4;
+
+    ExtractTopFeatures extract = new ExtractTopFeatures(numTopFeatures, dups);
 
     extract.processFile(inputFileName, featuresFileName);
   }
