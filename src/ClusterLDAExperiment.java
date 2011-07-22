@@ -58,7 +58,7 @@ public class ClusterLDAExperiment extends ClusterFeatureExperiment {
 
     boolean useDocCounts = Boolean.valueOf(args[index++]);
 
-    String priorType = args[index++]; // type of prior (UP, DP or PYP)
+    String priorType = args[index++]; // type of prior (UP, UPH, DP or PYP)
 
     String outputDir = args[index++]; // output directory
 

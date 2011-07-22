@@ -338,7 +338,7 @@ public class ClusterFeature {
           // the probability of adding item d to cluster c at this
           // point is therefore 1.0 / (# prev. clusters + theta)
 
-          double logPrior = Math.log(1.0) - Math.log(prev.size() + theta);
+          double logProb = Math.log(1.0) - Math.log(prev.size() + theta);
 
           // but we have to compute the impact on future clusters
 
@@ -347,15 +347,17 @@ public class ClusterFeature {
             int dpID = clusterAssignments[dp].ID;
 
             if (prev.contains(dpID))
-              logPrior += Math.log(1.0) - Math.log(prev.size() + theta);
+              logProb += Math.log(1.0) - Math.log(prev.size() + theta);
             else {
-              logPrior += Math.log(theta) - Math.log(prev.size() + theta);
+              logProb += Math.log(theta) - Math.log(prev.size() + theta);
               prev.add(dpID);
             }
           }
 
-          logDist[i] += logPrior;
+          logDist[i] += logProb;
         }
+        else if (priorType.equals("UPH"))
+          logDist[i] += Math.log(1.0);
         else if (priorType.equals("PYP"))
           logDist[i] += Math.log(cluster.clusterSize - eps);
         else
@@ -536,7 +538,7 @@ public class ClusterFeature {
 
       int nc = clusterCounts[c];
 
-      if (priorType.equals("UP")) {
+      if (priorType.equals("UP") || priorType.equals("UPH")) {
         logProb -= Math.log(theta + numActiveClusters);
         logProb += (nc == 0) ? logTheta : Math.log(1.0);
       }
