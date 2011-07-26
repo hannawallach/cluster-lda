@@ -29,7 +29,15 @@ public class InstanceListLoader {
 
       if (nd > 0) {
 
-        Document document = new Document(instance.getSource().toString());
+        String name = instance.getName().toString();
+
+        if (name == null)
+          name = instance.getSource().toString();
+
+        if (name == null)
+          name = Integer.toString(d);
+
+        Document document = new Document(name);
 
         TIntArrayList tokenList = new TIntArrayList();
 
