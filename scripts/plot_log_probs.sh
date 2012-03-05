@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 SCRIPT=`basename $0 | cut -d'.' -f1`.R
 

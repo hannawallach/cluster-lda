@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # Usage: e.g., mkdir -p results/sge; qsub -t 1-5 -cwd -V -o results/sge/stdout_0.5_UP.txt -e results/sge/stderr_0.5_UP.txt ./scripts/run_cluster.sh 0.5 UP
 
