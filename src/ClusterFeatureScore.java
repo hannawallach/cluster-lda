@@ -481,7 +481,7 @@ public class ClusterFeatureScore {
           continue;
         else {
 
-          pw.print(clusterNum); pw.print(" ");
+          pw.print(c); pw.print(" ");
           clusterNum++;
         }
 
