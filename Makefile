@@ -30,7 +30,7 @@ $(BUILD_DIR): #clean
 $(DATA_DIR)/patents/%: $(DATA_DIR)/patents/%.tar.gz
 	tar zxvf $< -C $(@D)
 
-$(DATA_DIR)/patents/%.dat: $(DATA_DIR)/patents/%
+$(DATA_DIR)/patents_%.dat: $(DATA_DIR)/patents/%
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
 	cc.mallet.classify.tui.Text2Vectors \
@@ -40,13 +40,21 @@ $(DATA_DIR)/patents/%.dat: $(DATA_DIR)/patents/%
 	--output $@ \
 	--input $<
 
+$(DATA_DIR)/%.dat: $(DATA_DIR)/%.csv
+	java $(JAVA_FLAGS) \
+	-classpath $(CP) \
+	cc.mallet.classify.tui.Csv2Vectors \
+	--keep-sequence \
+	--output $@ \
+	--input $<
+
 $(RESULTS_DIR)/lda/%/T$(T)-S$(S)-SAMPLE$(SAMPLE)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(S) / 10`; \
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
         edu.umass.cs.wallach.cluster.LDAExperiment \
-	$(DATA_DIR)/patents/$*.dat \
+	$(DATA_DIR)/$*.dat \
 	$(T) \
 	$(S) \
 	20 \
@@ -61,7 +69,7 @@ $(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
         edu.umass.cs.wallach.cluster.ClusterWordExperiment \
-	$(DATA_DIR)/patents/$*.dat \
+	$(DATA_DIR)/$*.dat \
 	$(C) \
 	$(SG) \
 	$(SC) \
@@ -83,7 +91,7 @@ $(RESULTS_DIR)/cluster_topic/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPL
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
         edu.umass.cs.wallach.cluster.ClusterFeatureExperiment \
-	$(DATA_DIR)/patents/$*.dat \
+	$(DATA_DIR)/$*.dat \
 	$(STATE_FILE) \
 	$(T) \
 	$(C) \
@@ -109,7 +117,7 @@ $(RESULTS_DIR)/cluster_lda/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
         edu.umass.cs.wallach.cluster.ClusterLDAExperiment \
-	$(DATA_DIR)/patents/$*.dat \
+	$(DATA_DIR)/$*.dat \
 	$(STATE_FILE) \
 	$(T) \
 	$(C) \
