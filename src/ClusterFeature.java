@@ -191,7 +191,7 @@ public class ClusterFeature {
 
     double[] alpha = sampleAlpha(numItns);
 
-    printAlpha(alpha, alphaFileName);
+    featureScore.printAlpha(alphaFileName);
 
     return alpha;
   }
@@ -451,22 +451,6 @@ public class ClusterFeature {
 
       pw.print(getLogLikelihood()); pw.print(" ");
       pw.print(getLogPrior()); pw.println();
-
-      pw.close();
-    }
-    catch (IOException e) {
-      System.out.println(e);
-    }
-  }
-
-  public void printAlpha(double[] alpha, String fileName) {
-
-    try {
-
-      PrintWriter pw = new PrintWriter(fileName);
-
-      for (int i=0; i<alpha.length; i++)
-        pw.println(alpha[i]);
 
       pw.close();
     }
