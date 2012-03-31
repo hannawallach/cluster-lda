@@ -31,8 +31,8 @@ public class ClusterFeatureExperiment {
 
   public static void main(String[] args) throws java.io.IOException {
 
-    if (args.length != 12) {
-      System.out.println("Usage: ClusterFeatureExperiment <instance_list> <feature_usage_file> <num_features> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <sample_conc_param> <use_doc_counts> <prior_type> <output_dir>");
+    if (args.length != 13) {
+      System.out.println("Usage: ClusterFeatureExperiment <instance_list> <feature_usage_file> <num_features> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <sample_conc_param> <alpha_per_cluster> <use_doc_counts> <prior_type> <output_dir>");
       System.exit(1);
     }
 
@@ -53,13 +53,15 @@ public class ClusterFeatureExperiment {
 
     boolean sampleConcentrationParameter = Boolean.valueOf(args[index++]);
 
+    boolean alphaPerCluster = Boolean.valueOf(args[index++]);
+
     boolean useDocCounts = Boolean.valueOf(args[index++]);
 
     String priorType = args[index++]; // type of prior (UP, UPH, DP or PYP)
 
     String outputDir = args[index++]; // output directory
 
-    assert index == 12;
+    assert index == 13;
 
     Alphabet wordDict = new Alphabet();
 
@@ -75,7 +77,7 @@ public class ClusterFeatureExperiment {
 
     int max = docs.size();
 
-    double[] alpha = new double[3];
+    double[] alpha = (alphaPerCluster) ? new double[max + 2] : new double[3];
     Arrays.fill(alpha, 0.1 * F);
 
     TIntIntHashMap[] counts = new TIntIntHashMap[docs.size()];

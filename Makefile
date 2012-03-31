@@ -63,7 +63,7 @@ $(RESULTS_DIR)/lda/%/T$(T)-S$(S)-SAMPLE$(SAMPLE)-ID$(ID):
 	$@ \
 	> $@/stdout.txt
 
-$(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+$(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(SG) / 10`; \
 	java $(JAVA_FLAGS) \
@@ -76,6 +76,7 @@ $(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE
 	$$I \
 	$(THETA) \
 	$(SAMPLE) \
+	$(PERCLUSTER) \
 	$(DOCCOUNTS) \
 	$(PRIOR) \
 	$@ \
@@ -85,7 +86,7 @@ $(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE
 
 # STATE_FILE should be a gzipped state file in MALLET format
 
-$(RESULTS_DIR)/cluster_topic/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+$(RESULTS_DIR)/cluster_topic/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(SG) / 10`; \
 	java $(JAVA_FLAGS) \
@@ -100,6 +101,7 @@ $(RESULTS_DIR)/cluster_topic/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPL
 	$$I \
 	$(THETA) \
 	$(SAMPLE) \
+	$(PERCLUSTER) \
 	$(DOCCOUNTS) \
 	$(PRIOR) \
 	$@ \
@@ -111,7 +113,7 @@ $(RESULTS_DIR)/cluster_topic/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPL
 
 # ST should be the number of topic iterations
 
-$(RESULTS_DIR)/cluster_lda/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+$(RESULTS_DIR)/cluster_lda/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(SG) / 10`; \
 	java $(JAVA_FLAGS) \
@@ -127,6 +129,7 @@ $(RESULTS_DIR)/cluster_lda/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)
 	$$I \
 	$(THETA) \
 	$(SAMPLE) \
+	$(PERCLUSTER) \
 	$(DOCCOUNTS) \
 	$(PRIOR) \
 	$@ \
