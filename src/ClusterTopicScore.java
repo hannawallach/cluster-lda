@@ -46,7 +46,7 @@ public class ClusterTopicScore {
     this.D = D;
     this.C = C;
 
-    assert alpha.length == 3;
+    assert (alpha.length == C+2) || (alpha.length == 3);
     this.alpha = alpha;
 
     this.score = score;
@@ -82,8 +82,10 @@ public class ClusterTopicScore {
     int njd = topicDocCounts[j][d];
     int nd = topicDocCountsNorm[d];
 
-    score *= alpha[2] / (nd + alpha[2]);
-    score += njd / (nd + alpha[2]);
+    double currentAlpha = (alpha.length == 3) ? alpha[2] : alpha[c+2];
+
+    score *= currentAlpha / (nd + currentAlpha);
+    score += njd / (nd + currentAlpha);
 
     return score;
   }

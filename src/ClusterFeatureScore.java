@@ -36,6 +36,8 @@ public class ClusterFeatureScore {
 
   private double[] alpha;
 
+  private boolean[] activeAlpha;
+
   private boolean useDocs;
 
   private boolean resetToTrain = false;
@@ -55,7 +57,11 @@ public class ClusterFeatureScore {
     this.D = D;
     this.C = C;
 
+    assert (alpha.length == C+2) || (alpha.length == 3);
     this.alpha = alpha;
+
+    this.activeAlpha = new boolean[alpha.length];
+    Arrays.fill(activeAlpha, true);
 
     this.unseenCounts = unseenCounts;
 
@@ -102,8 +108,10 @@ public class ClusterFeatureScore {
       int nfd = featureItemCounts.get(index);
       int nd = featureItemCountsNorm[d];
 
-      score *= alpha[2] / (nd + alpha[2]);
-      score += nfd / (nd + alpha[2]);
+      double currentAlpha = (alpha.length == 3) ? alpha[2] : alpha[c+2];
+
+      score *= currentAlpha / (nd + currentAlpha);
+      score += nfd / (nd + currentAlpha);
     }
 
     if (unseenCounts != null)
@@ -368,6 +376,24 @@ public class ClusterFeatureScore {
     return alpha;
   }
 
+  public void activateAlpha(int c) {
+
+    if (alpha.length == 3)
+      return;
+
+    activeAlpha[c+2] = true;
+    assert alpha[c+2] == 0.1 * F;
+  }
+
+  public void deactivateAlpha(int c) {
+
+    if (alpha.length == 3)
+      return;
+
+    activeAlpha[c+2] = false;
+    alpha[c+2] = 0.1 * F;
+  }
+
   public void printAlpha(String fileName) {
 
     try {
@@ -375,7 +401,8 @@ public class ClusterFeatureScore {
       PrintWriter pw = new PrintWriter(fileName);
 
       for (int i=0; i<alpha.length; i++)
-        pw.println(alpha[i]);
+        if (activeAlpha[i])
+          pw.println(alpha[i]);
 
       pw.close();
     }
@@ -406,10 +433,11 @@ public class ClusterFeatureScore {
     double[] rawParam = new double[I];
     double rawParamSum = 0.0;
 
-    for (int i=0; i<I; i++) {
-      rawParam[i] = Math.log(alpha[i]);
-      rawParamSum += rawParam[i];
-    }
+    for (int i=0; i<I; i++)
+      if (activeAlpha[i]) {
+        rawParam[i] = Math.log(alpha[i]);
+        rawParamSum += rawParam[i];
+      }
 
     double[] l = new double[I];
     double[] r = new double[I];
@@ -419,10 +447,11 @@ public class ClusterFeatureScore {
       double lp = logProb(items, assignments, rawParam) + rawParamSum;
       double lpNew = Math.log(rng.nextUniform()) + lp;
 
-      for (int i=0; i<I; i++) {
-        l[i] = rawParam[i] - rng.nextUniform() * stepSize;
-        r[i] = l[i] + stepSize;
-      }
+      for (int i=0; i<I; i++)
+        if (activeAlpha[i]) {
+          l[i] = rawParam[i] - rng.nextUniform() * stepSize;
+          r[i] = l[i] + stepSize;
+        }
 
       double[] rawParamNew = new double[I];
       double rawParamNewSum = 0.0;
@@ -431,19 +460,22 @@ public class ClusterFeatureScore {
 
         rawParamNewSum = 0.0;
 
-        for (int i=0; i<I; i++) {
-          rawParamNew[i] = l[i] + rng.nextUniform() * (r[i] - l[i]);
-          rawParamNewSum += rawParamNew[i];
-        }
+        for (int i=0; i<I; i++)
+          if (activeAlpha[i]) {
+            rawParamNew[i] = l[i] + rng.nextUniform() * (r[i] - l[i]);
+            rawParamNewSum += rawParamNew[i];
+          }
 
         if (logProb(items, assignments, rawParamNew) + rawParamNewSum > lpNew)
           break;
         else
           for (int i=0; i<I; i++)
-            if (rawParamNew[i] < rawParam[i])
-              l[i] = rawParamNew[i];
-            else
-              r[i] = rawParamNew[i];
+            if (activeAlpha[i]) {
+              if (rawParamNew[i] < rawParam[i])
+                l[i] = rawParamNew[i];
+              else
+                r[i] = rawParamNew[i];
+            }
       }
 
       rawParam = rawParamNew;
@@ -451,7 +483,8 @@ public class ClusterFeatureScore {
     }
 
     for (int i=0; i<I; i++)
-      alpha[i] = Math.exp(rawParam[i]);
+      if (activeAlpha[i])
+        alpha[i] = Math.exp(rawParam[i]);
   }
 
   public void print(String fileName) {

@@ -147,8 +147,10 @@ public class ClusterFeature {
     emptyClusterStack = new Stack<Cluster>();
 
     for (Cluster cluster: clusters)
-      if (cluster.isEmpty())
+      if (cluster.isEmpty()) {
         emptyClusterStack.push(cluster);
+        featureScore.deactivateAlpha(cluster.ID);
+      }
 
     initialized = true;
   }
@@ -172,8 +174,10 @@ public class ClusterFeature {
     emptyClusterStack = new Stack<Cluster>();
 
     for (Cluster cluster: clusters)
-      if (cluster.isEmpty())
+      if (cluster.isEmpty()) {
         emptyClusterStack.push(cluster);
+        featureScore.deactivateAlpha(cluster.ID);
+      }
     */
 
     for (int s=1; s<=S; s++) {
@@ -242,6 +246,7 @@ public class ClusterFeature {
         if (oldCluster.isEmpty()) {
           activeClusters.remove(oldID);
           emptyClusterStack.push(oldCluster);
+          featureScore.deactivateAlpha(oldID);
         }
 
         // remove item from feature counts
@@ -379,8 +384,10 @@ public class ClusterFeature {
         emptyClusterStack.push(empty);
         assert empty.ID != c;
       }
-      else
+      else {
+        featureScore.activateAlpha(c);
         assert empty.ID == c;
+      }
 
       // add item to feature counts
 
