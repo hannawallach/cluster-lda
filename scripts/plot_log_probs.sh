@@ -9,6 +9,8 @@ T=100
 
 for PRIOR in `echo UP PYP DP`; do
   for THETA in `echo 0.25 0.5 1.0 2.0 5.0 10.0 15.0 20.0`; do
-    cat scripts/${SCRIPT} | R --slave --vanilla --args results/cluster_lda/${DATA}/T${T}-C25-SG2000-SC1-ST1-THETA${THETA}-SAMPLEfalse-PERCLUSTERfalse-DOCCOUNTStrue-${PRIOR}-ID ${RUNS}
+    for EPS in `echo 0.0`; do
+      cat scripts/${SCRIPT} | R --slave --vanilla --args results/cluster_lda/${DATA}/T${T}-C25-SG2000-SC1-ST1-THETA${THETA}-EPS${EPS}-SAMPLEfalse-PERCLUSTERfalse-DOCCOUNTStrue-${PRIOR}-ID ${RUNS}
+    done
   done
 done

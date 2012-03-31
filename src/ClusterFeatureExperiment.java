@@ -31,8 +31,8 @@ public class ClusterFeatureExperiment {
 
   public static void main(String[] args) throws java.io.IOException {
 
-    if (args.length != 13) {
-      System.out.println("Usage: ClusterFeatureExperiment <instance_list> <feature_usage_file> <num_features> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <sample_conc_param> <alpha_per_cluster> <use_doc_counts> <prior_type> <output_dir>");
+    if (args.length != 14) {
+      System.out.println("Usage: ClusterFeatureExperiment <instance_list> <feature_usage_file> <num_features> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <eps_init> <sample_cluster_params> <alpha_per_cluster> <use_doc_counts> <prior_type> <output_dir>");
       System.exit(1);
     }
 
@@ -50,8 +50,9 @@ public class ClusterFeatureExperiment {
     int saveStateInterval = Integer.parseInt(args[index++]);
 
     double theta = Double.parseDouble(args[index++]);
+    double eps = Double.parseDouble(args[index++]);
 
-    boolean sampleConcentrationParameter = Boolean.valueOf(args[index++]);
+    boolean sampleClusterParameters = Boolean.valueOf(args[index++]);
 
     boolean alphaPerCluster = Boolean.valueOf(args[index++]);
 
@@ -61,7 +62,7 @@ public class ClusterFeatureExperiment {
 
     String outputDir = args[index++]; // output directory
 
-    assert index == 13;
+    assert index == 14;
 
     Alphabet wordDict = new Alphabet();
 
@@ -87,9 +88,13 @@ public class ClusterFeatureExperiment {
     double[] param;
 
     if (priorType.equals("PYP"))
-      param = new double[] { theta, 0.01 };
-    else
+      param = new double[] { theta, eps };
+    else {
+
+      assert eps == 0.0;
+
       param = new double[] { theta };
+    }
 
     ct.initialize(param, priorType, max, alpha, F, counts, null, useDocCounts, docs); // initialize the clustering model
 
@@ -101,7 +106,7 @@ public class ClusterFeatureExperiment {
 
       if (s % saveStateInterval == 0) {
 
-        ct.estimate(sampleConcentrationParameter, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/param.txt", outputDir + "/log_prob.txt");
+        ct.estimate(sampleClusterParameters, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/param.txt", outputDir + "/log_prob.txt");
 
         alpha = ct.sampleAlpha(5, outputDir + "/alpha.txt." + itn);
 
@@ -109,7 +114,7 @@ public class ClusterFeatureExperiment {
       }
       else {
 
-        ct.estimate(sampleConcentrationParameter, numClusterIterations);
+        ct.estimate(sampleClusterParameters, numClusterIterations);
 
         alpha = ct.sampleAlpha(5);
       }

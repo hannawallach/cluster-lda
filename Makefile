@@ -63,7 +63,7 @@ $(RESULTS_DIR)/lda/%/T$(T)-S$(S)-SAMPLE$(SAMPLE)-ID$(ID):
 	$@ \
 	> $@/stdout.txt
 
-$(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+$(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-EPS$(EPS)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(SG) / 10`; \
 	java $(JAVA_FLAGS) \
@@ -75,6 +75,7 @@ $(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE
 	$(SC) \
 	$$I \
 	$(THETA) \
+	$(EPS) \
 	$(SAMPLE) \
 	$(PERCLUSTER) \
 	$(DOCCOUNTS) \
@@ -84,7 +85,7 @@ $(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE
 
 # STATE_FILE should be a gzipped state file in MALLET format
 
-$(RESULTS_DIR)/cluster_topic/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+$(RESULTS_DIR)/cluster_topic/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-EPS$(EPS)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(SG) / 10`; \
 	java $(JAVA_FLAGS) \
@@ -98,6 +99,7 @@ $(RESULTS_DIR)/cluster_topic/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$
 	$(SC) \
 	$$I \
 	$(THETA) \
+	$(EPS) \
 	$(SAMPLE) \
 	$(PERCLUSTER) \
 	$(DOCCOUNTS) \
@@ -107,7 +109,7 @@ $(RESULTS_DIR)/cluster_topic/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-SAMPLE$
 
 # STATE_FILE should be a gzipped state file in MALLET format
 
-$(RESULTS_DIR)/cluster_lda/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-ST$(ST)-THETA$(THETA)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
+$(RESULTS_DIR)/cluster_lda/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-ST$(ST)-THETA$(THETA)-EPS$(EPS)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
 	I=`expr $(SG) / 10`; \
 	java $(JAVA_FLAGS) \
@@ -122,6 +124,7 @@ $(RESULTS_DIR)/cluster_lda/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-ST$(ST)-THETA$(THETA)-S
 	$(ST) \
 	$$I \
 	$(THETA) \
+	$(EPS) \
 	$(SAMPLE) \
 	$(PERCLUSTER) \
 	$(DOCCOUNTS) \

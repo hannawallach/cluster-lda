@@ -46,8 +46,8 @@ public class ClusterWordExperiment extends ClusterFeatureExperiment {
 
   public static void main(String[] args) throws java.io.IOException {
 
-    if (args.length != 10) {
-      System.out.println("Usage: ClusterWordExperiment <instance_list> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <sample_conc_param> <use_doc_counts> <prior_type> <output_dir>");
+    if (args.length != 11) {
+      System.out.println("Usage: ClusterWordExperiment <instance_list> <num_clusters> <num_itns> <num_cluster_itns> <save_state_interval> <theta_init> <eps_init> <sample_cluster_params> <use_doc_counts> <prior_type> <output_dir>");
       System.exit(1);
     }
 
