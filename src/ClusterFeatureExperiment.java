@@ -17,8 +17,15 @@ public class ClusterFeatureExperiment {
 
     LogRandoms rng = new LogRandoms();
 
-    for (int d=0; d<docs.size(); d++)
-      docs.getDocument(d).setCluster(rng.nextInt(C));
+    if (C == 1)
+      for (int d=0; d<docs.size(); d++)
+        docs.getDocument(d).setCluster(0);
+    else if (C == docs.size())
+      for (int d=0; d<docs.size(); d++)
+        docs.getDocument(d).setCluster(d);
+    else
+      for (int d=0; d<docs.size(); d++)
+        docs.getDocument(d).setCluster(rng.nextInt(C));
   }
 
   public static void getClusteredCorpus(Corpus docs, ClusterFeature.Cluster[] clusterAssignments) {
