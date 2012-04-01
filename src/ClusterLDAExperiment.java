@@ -119,9 +119,14 @@ public class ClusterLDAExperiment extends ClusterFeatureExperiment {
 
       // cluster documents and output final clustering
 
+      boolean sample = false;
+
+      if (s > (numIterations / 2))
+        sample = sampleClusterParameters;
+
       if (s % saveStateInterval == 0) {
 
-        ct.estimate(sampleClusterParameters, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/param.txt", outputDir + "/log_prob.txt");
+        ct.estimate(sample, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/param.txt", outputDir + "/log_prob.txt");
 
         alpha = ct.sampleAlpha(5, outputDir + "/alpha.txt." + itn);
 
@@ -129,7 +134,7 @@ public class ClusterLDAExperiment extends ClusterFeatureExperiment {
       }
       else {
 
-        ct.estimate(sampleClusterParameters, numClusterIterations);
+        ct.estimate(sample, numClusterIterations);
 
         alpha = ct.sampleAlpha(5);
       }
