@@ -113,7 +113,12 @@ public class ClusterFeatureExperiment {
 
       if (s % saveStateInterval == 0) {
 
-        ct.estimate(sampleClusterParameters, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/param.txt", outputDir + "/log_prob.txt");
+        boolean sample = false;
+
+        if (s > (numIterations / 2))
+          sample = sampleClusterParameters;
+
+        ct.estimate(sample, numClusterIterations, outputDir + "/cluster_assignments.txt.gz." + itn, outputDir + "/num_clusters.txt", outputDir + "/param.txt", outputDir + "/log_prob.txt");
 
         alpha = ct.sampleAlpha(5, outputDir + "/alpha.txt." + itn);
 
