@@ -195,7 +195,7 @@ public class ClusterLDA {
         if (printInterval != 0) {
           if (s % printInterval == 0) {
             System.out.println();
-            wordScore.print(wordDict, 0.0, 10, true, null);
+            wordScore.print(wordDict, 0.0, 20, true, null);
 
             logProbWriter.println(logProb(docs));
             logProbWriter.flush();
