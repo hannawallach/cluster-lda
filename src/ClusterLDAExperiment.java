@@ -121,7 +121,7 @@ public class ClusterLDAExperiment extends ClusterFeatureExperiment {
 
       boolean sample = false;
 
-      if (s > (numIterations / 2))
+      if (s > Math.min(numIterations / 2, 1000))
         sample = sampleClusterParameters;
 
       if (s % saveStateInterval == 0) {
@@ -153,9 +153,9 @@ public class ClusterLDAExperiment extends ClusterFeatureExperiment {
       ClusterLDA lda = new ClusterLDA();
 
       if (s % saveStateInterval == 0)
-        lda.estimate(docs, null, z, (s-1) * numTopicIterations, F, max, alpha, beta, numTopicIterations, 1, 1, new boolean[] { false, true }, null, null, null, outputDir + "/topic_summary.txt.gz." + itn, outputDir + "/state.txt.gz", null, null, outputDir + "/log_prob_topics_and_words.txt");
+        lda.estimate(docs, null, z, (s-1) * numTopicIterations, F, max, alpha, beta, numTopicIterations, 1, 1, new boolean[] { false, true }, null, outputDir + "/doc_topics.txt.gz." + itn, outputDir + "/topic_words.txt.gz." + itn, outputDir + "/topic_summary.txt.gz." + itn, outputDir + "/state.txt.gz", null, outputDir + "/beta.txt", outputDir + "/log_prob_topics_and_words.txt");
       else
-        lda.estimate(docs, null, z, (s-1) * numTopicIterations, F, max, alpha, beta, numTopicIterations, 1, 0, new boolean[] { false, true }, null, null, null, null, null, null, null, outputDir + "/log_prob_topics_and_words.txt");
+        lda.estimate(docs, null, z, (s-1) * numTopicIterations, F, max, alpha, beta, numTopicIterations, 0, 0, new boolean[] { false, true }, null, null, null, null, null, null, null, outputDir + "/log_prob_topics_and_words.txt");
 
       // extract new topic assignments and parameter values
 
