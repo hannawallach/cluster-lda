@@ -1,4 +1,4 @@
-MALLET_DIR = ~/Projects/Work/MALLET
+MALLET_DIR = ~/Software/Java/MALLET
 
 all: mallet.jar mallet-deps.jar
 
