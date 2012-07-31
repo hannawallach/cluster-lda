@@ -231,7 +231,7 @@ public class ClusterLDA {
         wordScore.print(wordDict, topicWordsFileName);
 
       if (topicSummaryFileName != null)
-        wordScore.print(wordDict, 0.0, 10, true, topicSummaryFileName);
+        wordScore.print(wordDict, 0.0, 20, true, topicSummaryFileName);
     }
     catch (IOException e) {
       System.out.println(e);
