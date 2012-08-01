@@ -65,7 +65,7 @@ $(RESULTS_DIR)/lda/%/T$(T)-S$(S)-SAMPLE$(SAMPLE)-ID$(ID):
 
 $(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-EPS$(EPS)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
-	I=`expr $(SG) / 10`; \
+	I=`expr $(SG) / 100`; \
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
         edu.umass.cs.wallach.cluster.ClusterWordExperiment \
@@ -87,7 +87,7 @@ $(RESULTS_DIR)/cluster_word/%/C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-EPS$(EPS)-SAMP
 
 $(RESULTS_DIR)/cluster_topic/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-EPS$(EPS)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
-	I=`expr $(SG) / 10`; \
+	I=`expr $(SG) / 100`; \
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
         edu.umass.cs.wallach.cluster.ClusterFeatureExperiment \
@@ -111,7 +111,7 @@ $(RESULTS_DIR)/cluster_topic/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-THETA$(THETA)-EPS$(EP
 
 $(RESULTS_DIR)/cluster_lda/%/T$(T)-C$(C)-SG$(SG)-SC$(SC)-ST$(ST)-THETA$(THETA)-EPS$(EPS)-SAMPLE$(SAMPLE)-PERCLUSTER$(PERCLUSTER)-DOCCOUNTS$(DOCCOUNTS)-$(PRIOR)-ID$(ID):
 	mkdir -p $@; \
-	I=`expr $(SG) / 10`; \
+	I=`expr $(SG) / 100`; \
 	java $(JAVA_FLAGS) \
 	-classpath $(CP) \
         edu.umass.cs.wallach.cluster.ClusterLDAExperiment \
