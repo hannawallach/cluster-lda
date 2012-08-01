@@ -170,7 +170,7 @@ public class ClusterLDA {
 
     try {
 
-      PrintWriter logProbWriter = new PrintWriter(new FileWriter(logProbFileName, append));
+      PrintWriter logProbWriter = new PrintWriter(new FileWriter(logProbFileName, append), true);
 
       // count matrices have been populated, every token has been
       // assigned to a single topic, so Gibbs sampling can start
@@ -232,6 +232,8 @@ public class ClusterLDA {
 
       if (topicSummaryFileName != null)
         wordScore.print(wordDict, 0.0, 20, true, topicSummaryFileName);
+
+      logProbWriter.close();
     }
     catch (IOException e) {
       System.out.println(e);
