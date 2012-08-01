@@ -115,6 +115,8 @@ public class ExtractTopFeatures {
         c++;
       }
 
+      in.close();
+
       if (!dups)
         C = c;
       else
