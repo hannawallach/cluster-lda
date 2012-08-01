@@ -142,9 +142,9 @@ $(RESULTS_DIR)/cluster/%/num_clusters.txt:
 
 .PHONY: extract-features
 
-extract-features: $(BUILD_DIR)
+extract-features:
 	java $(JAVA_FLAGS) \
-	-classpath $(CP):$(BUILD_DIR) \
+	-classpath $(CP) \
 	edu.umass.cs.wallach.cluster.ExtractTopFeatures \
 	$(INPUT_FILE) \
 	$(FEATURES_FILE) \
